@@ -143,23 +143,20 @@ def generate_n_equivalent_smiles(smiles_tokens, n):
         factor = n // len(new_smiles_list) + 1
         new_smiles_list = (new_smiles_list * factor)[:n]
 
-    new_smiles_list = [smiles_tokenizer(s) for s in new_smiles_list]
+    new_smiles_list = [atomwise_tokenizer(s) for s in new_smiles_list]
     return new_smiles_list
 
 
-def smiles_tokenizer(smiles):
+def atomwise_tokenizer(smiles):
     # From https://github.com/pschwllr/MolecularTransformer
+    # Should also work with selfies (to verify)
     pattern = '(\[[^\]]+]|Br?|Cl?|N|O|S|P|F|I|b|c|n|o|s|p|\(|\)'+\
               '|\.|=|#|-|\+|\\\\|\/|:|~|@|\?|>|\*|\$|\%[0-9]{2}|[0-9])'
     regex = re.compile(pattern)
     tokens = [token for token in regex.findall(smiles)]
     assert smiles == ''.join(tokens)
     return ' '.join(tokens)
-
-
-def selfies_tokenizer(selfies):
-    return selfies.replace('][', '] [').replace('].[', '] . [')
-
+    
 
 def canonicalize_smiles(smiles):
     try:
@@ -174,7 +171,7 @@ def create_selfies_from_smiles(smiles):
         selfies = sf.encoder(smiles)
     except sf.EncoderError:
         selfies = create_selfies_from_smiles_molecule_by_molecule(smiles)
-    return selfies_tokenizer(selfies)
+    return atomwise_tokenizer(selfies)
 
 
 def create_selfies_from_smiles_molecule_by_molecule(smiles):
