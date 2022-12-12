@@ -6,18 +6,21 @@ from tqdm import tqdm
 from rdkit import Chem
 from rdkit import RDLogger
 RDLogger.DisableLog('rdApp.*')
+from SmilesPE.tokenizer import SPE_Tokenizer
 
 
 TASKS = ['product-pred', 'reactant-pred', 'reagent-pred', 'single-reactant-pred']
 FOLDS = [1, 2, 5, 10, 20]
 SPLITS = ['test', 'val', 'train']
 ORIGINAL_DIR = os.path.join('data', 'original')
+SPE_ENCODER_PATH_SMILES = os.path.join(ORIGINAL_DIR, 'spe_codes_smiles.txt')
+SPE_ENCODER_PATH_SELFIES = os.path.join(ORIGINAL_DIR, 'spe_codes_selfies.txt')
 
 
 def main():
-    create_smiles_datasets()
-    create_selfies_datasets()
-    create_bpe_datasets()
+    create_smiles_datasets()  # original data -> all tasks & data augmentations
+    create_selfies_datasets()  # smiles data -> selfies data
+    create_spe_datasets()  # smiles and selfies atom data -> spe data
 
 
 def create_smiles_datasets():
@@ -32,15 +35,20 @@ def create_smiles_datasets():
 def create_selfies_datasets():
     print('\nStarted generating selfies datasets from smiles datasets')
     for folder, _, files in os.walk('data'):
-        if '/smiles/' in folder and 'x1' in folder and 'single-' not in folder:
+        if 'smiles' in folder and 'x1' in folder and 'single-' not in folder:
             for smiles_file in [f for f in files if '.txt' in f]:
                 smiles_full_path = os.path.join(folder, smiles_file)
                 write_selfies_file_from_smiles_file(smiles_full_path)
 
 
-def create_bpe_datasets():
-    print('\nStarted generating bpe datasets from smiles datasets')
-    ...
+def create_spe_datasets():
+    print('\nStarted generating spe datasets from atom-tokenized datasets')
+    for folder, _, files in os.walk('data'):
+        if 'atom' in folder and 'x1' in folder\
+            and 'single-' not in folder and 'reag-' not in folder:
+            for atom_file in [f for f in files if '.txt' in f]:
+                atom_full_path = os.path.join(folder, atom_file)
+                write_spe_file_from_atom_file(atom_full_path)
 
 
 def write_selfies_file_from_smiles_file(smiles_path):
@@ -53,6 +61,32 @@ def write_selfies_file_from_smiles_file(smiles_path):
             progress_bar.set_description('Convert %s to selfies' % smiles_path)
             f_selfies.write(create_selfies_from_smiles(smiles) + '\n')
         
+
+def write_spe_file_from_atom_file(atom_path):
+    # Find the correct spe-tokenizer (smiles or selfies)
+    if 'smiles' in atom_path:
+        spe_path = SPE_ENCODER_PATH_SMILES
+    elif 'selfies' in atom_path:
+        spe_path = SPE_ENCODER_PATH_SELFIES
+    else:
+        raise ValueError('There is something wrong with the input data path')
+    with open(spe_path, 'r') as spe_file:
+        tokenizer = SPE_Tokenizer(codes=spe_file)
+
+    # Build a directory and a path for the new spe-tokenized dataset
+    spe_path = atom_path.replace('atom', 'spe')
+    os.makedirs(os.path.split(spe_path)[0], exist_ok=True)
+
+    # Build spe-tokenized dataset from the original dataset
+    with open(atom_path, 'r') as in_file,\
+         open(spe_path, 'w') as out_file:
+        progress_bar = tqdm(in_file.readlines())
+        for atom_tokenized_rxn in progress_bar:
+            progress_bar.set_description('Convert %s to spe' % atom_path)
+            rxn = atom_tokenized_rxn.replace(' ', '')
+            spe_tokenized_rnx = tokenizer.tokenize(rxn)
+            out_file.write(spe_tokenized_rnx + '\n')
+
 
 def generate_augmented_dataset(task, fold):
     include_reagent_info = (['+', '-'] if task == 'reactant-pred' else ['+'])
@@ -149,7 +183,7 @@ def generate_n_equivalent_smiles(smiles_tokens, n):
 
 def atomwise_tokenizer(smiles):
     # From https://github.com/pschwllr/MolecularTransformer
-    # Should also work with selfies (to verify)
+    # Should also work with selfies (thanks to the [])
     pattern = '(\[[^\]]+]|Br?|Cl?|N|O|S|P|F|I|b|c|n|o|s|p|\(|\)'+\
               '|\.|=|#|-|\+|\\\\|\/|:|~|@|\?|>|\*|\$|\%[0-9]{2}|[0-9])'
     regex = re.compile(pattern)
@@ -198,7 +232,8 @@ def create_selfies_from_smiles_molecule_by_molecule(smiles):
             # O=C(O[IH2](OC(=O)C(F)(F)F)c1ccccc1)C(F)(F)F
             # COc1cc2c(cc1OC)C([PH2](c1ccccc1)(c1ccccc1)c1ccccc1)OC2=O
             # O=c1[nH]c2c3occc3c(F)c(F)c2n1-c1ccc([IH]S(=O)(=O)C2CC2COCc2ccccc2)cc1F
-            print('This molecule didn''t work %s' % smiles_molecule)
+            # print('This molecule didn''t work %s' % smiles_molecule)
+            selfies_molecules.append('?') # to preserve # molecules / rxn
     return '.'.join(selfies_molecules)
 
 
