@@ -18,6 +18,7 @@ SPE_ENCODER_PATH_SELFIES = os.path.join(ORIGINAL_DIR, 'spe_codes_selfies.txt')
 
 
 def main():
+    random.seed(1234)  # this is enough for replicable augmentation
     create_smiles_datasets()  # original data -> all tasks & data augmentations
     create_selfies_datasets()  # smiles data -> selfies data
     create_spe_datasets()  # smiles and selfies atom data -> spe data
