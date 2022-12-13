@@ -7,11 +7,10 @@ gitignore_content = \
 !.gitignore
 """
 
-config_dir = './open-nmt/config'
-data_dir = './data'
+dirs_to_add_to_git = ['./open-nmt/config', './data']
 
-for top_dir in ['config_dir', 'data_dir']:
-    for folder, subfolders, files in os.walk(config_dir):
+for top_dir in dirs_to_add_to_git:
+    for folder, subfolders, files in os.walk(top_dir):
         if len(subfolders) == 0:
             with open(os.path.join(folder, '.gitignore'), 'w') as f:
                 f.write(gitignore_content)
