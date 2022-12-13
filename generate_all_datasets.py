@@ -9,7 +9,8 @@ RDLogger.DisableLog('rdApp.*')
 from SmilesPE.tokenizer import SPE_Tokenizer
 
 
-TASKS = ['product-pred', 'reactant-pred', 'reagent-pred', 'single-reactant-pred']
+TASKS = ['product-pred', 'reactant-pred', 'reagent-pred',
+         'reactant-pred-single', 'reactant-pred-noreag']
 FOLDS = [1, 2, 5, 10, 20]
 SPLITS = ['test', 'val', 'train']
 ORIGINAL_DIR = os.path.join('data', 'original')
@@ -36,7 +37,8 @@ def create_smiles_datasets():
 def create_selfies_datasets():
     print('\nStarted generating selfies datasets from smiles datasets')
     for folder, _, files in os.walk('data'):
-        if 'smiles' in folder and 'x1' in folder and 'single-' not in folder:
+        if 'smiles' in folder and 'x1-' in folder\
+            and '-single' not in folder and '-noreag' not in folder:
             for smiles_file in [f for f in files if '.txt' in f]:
                 smiles_full_path = os.path.join(folder, smiles_file)
                 write_selfies_file_from_smiles_file(smiles_full_path)
@@ -45,8 +47,8 @@ def create_selfies_datasets():
 def create_spe_datasets():
     print('\nStarted generating spe datasets from atom-tokenized datasets')
     for folder, _, files in os.walk('data'):
-        if 'atom' in folder and 'x1' in folder\
-            and 'single-' not in folder and 'reag-' not in folder:
+        if 'atom' in folder and 'x1-' in folder\
+            and '-single' not in folder and '-noreag' not in folder:
             for atom_file in [f for f in files if '.txt' in f]:
                 atom_full_path = os.path.join(folder, atom_file)
                 write_spe_file_from_atom_file(atom_full_path)
@@ -90,26 +92,24 @@ def write_spe_file_from_atom_file(atom_path):
 
 
 def generate_augmented_dataset(task, fold):
-    include_reagent_info = (['+', '-'] if task == 'reactant-pred' else ['+'])
-    for reag_flag in include_reagent_info:
-        print('---- Reagent info: %s' % reag_flag)
-        out_subdir = 'x%s-reag%s' % (fold, reag_flag)
-        out_fulldir = os.path.join('data', task, 'smiles', 'atom', out_subdir)
-        os.makedirs(out_fulldir, exist_ok=True)
-        for split in SPLITS:
-            write_smiles_files(out_fulldir, task, fold, reag_flag, split)
+    out_subdir = 'x%s-reag%s' % (fold)
+    out_fulldir = os.path.join('data', task, 'smiles', 'atom', out_subdir)
+    os.makedirs(out_fulldir, exist_ok=True)
+    for split in SPLITS:
+        write_smiles_files(out_fulldir, task, fold, split)
 
 
-def write_smiles_files(out_dir, task, fold, reag_flag, split):
+def write_smiles_files(out_dir, task, fold, split):
     with open(os.path.join(ORIGINAL_DIR, 'src-%s.txt' % split), 'r') as src_in,\
          open(os.path.join(ORIGINAL_DIR, 'tgt-%s.txt' % split), 'r') as tgt_in,\
          open(os.path.join(out_dir, 'src-%s.txt' % split), 'w') as src_out,\
          open(os.path.join(out_dir, 'tgt-%s.txt' % split), 'w') as tgt_out:
 
+        noreag_flag = '-noreag' in task
         progress_bar = tqdm(zip(src_in.readlines(), tgt_in.readlines()))
         for src, tgt in progress_bar:
             progress_bar.set_description('------ Split %s' % split)
-            species = parse_rxn(src, tgt, reag_flag)
+            species = parse_rxn(src, tgt, noreag_flag)
             new_src, new_tgt = create_new_sample(task, **species)
             if len(new_src) == 0 or len(new_tgt) == 0: continue
             new_src, new_tgt = augment_sample(new_src, new_tgt, fold)
@@ -117,13 +117,13 @@ def write_smiles_files(out_dir, task, fold, reag_flag, split):
             tgt_out.write(new_tgt + '\n')
 
 
-def parse_rxn(src, tgt, reag_flag):
+def parse_rxn(src, tgt, noreag_flag):
     src, tgt = src.strip(), tgt.strip()
     if '  >' in src: src = src.replace('  >', ' > ')
     precursors = src.split(' > ')
 
     reactants, reagents = [p.split(' . ') for p in precursors]
-    if reag_flag == '-': reagents = []
+    if noreag_flag: reagents = []
     products = tgt.split(' . ')  # should we pick only the largest?
 
     return {'reactants': [r for r in reactants if r != ''],\
@@ -135,13 +135,13 @@ def create_new_sample(task, reactants, reagents, products):
     if task == 'product-pred':
         new_src = ' . '.join(reactants + reagents)
         new_tgt = ' . '.join(products)
-    elif task == 'reactant-pred':
+    elif task in ['reactant-pred', 'reactant-pred-noreag']:
         new_src = ' . '.join(reagents + products)
         new_tgt = ' . '.join(reactants)
     elif task == 'reagent-pred':
         new_src = ' . '.join(reactants + products)
         new_tgt = ' . '.join(reagents)
-    elif task == 'single-reactant-pred':
+    elif task == 'reactant-pred-single':
         single_react = random.sample(reactants, 1)  # list
         other_reacts = [r for r in reactants if r != single_react]
         new_src = ' . '.join(other_reacts + reagents + products)
