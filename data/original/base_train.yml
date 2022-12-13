@@ -52,7 +52,7 @@ adam_beta2: 0.998
 decay_method: noam
 learning_rate: 2.0
 max_grad_norm: 0.0
-early_stopping: 4  # in validation epochs - will use accuracy and ppl as scores
+early_stopping: 10  # in validation epochs - will use accuracy and ppl as scores
 
 # Batch options 
 batch_size: 4096
