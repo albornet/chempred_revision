@@ -4,4 +4,7 @@ conda activate chempred_revision
 conda install -y gensim pandas numpy tqdm
 conda install -y selfies rdkit -c conda-forge
 pip install SmilesPE
+cd ../open-nmt
+pip install -e .
+cd ../environments
 conda env export > environment.yml
