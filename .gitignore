@@ -136,3 +136,5 @@ data/reactant-pred/*
 data/reactant-pred-noreag/*
 data/reactant-pred-single/*
 data/reagent-pred/*
+open-nmt/.github/*
+open-nmt/.gitignore
