@@ -1,0 +1,80 @@
+# Base path for saving miscellaneous data (not sure what gets saved here...)
+save_data: ./logs/$SPEC_FOLDER/$EMBED_TYPE/save_data
+
+# Save vocabulary
+src_vocab: ./data/$SPEC_FOLDER/src_vocab.vocab
+share_vocab: True
+
+# Prevent overwriting of existing files (or not)
+overwrite: True
+
+# Log file
+log_file: ./logs/$SPEC_FOLDER/$EMBED_TYPE/logs.log
+
+# Corpus opts
+data:
+  corpus_1:
+    path_src: ./data/$SPEC_FOLDER/src-train.txt
+    path_tgt: ./data/$SPEC_FOLDER/tgt-train.txt
+  valid:
+    path_src: ./data/$SPEC_FOLDER/src-val.txt
+    path_tgt: ./data/$SPEC_FOLDER/tgt-val.txt
+
+# Place to save the checkpoints
+save_model: ./logs/$SPEC_FOLDER/$EMBED_TYPE/ckpts/model
+save_checkpoint_steps: 10000
+keep_checkpoint: 20
+seed: 1234
+
+# Training steps
+train_steps: $N_STEPS
+valid_steps: 10000
+warmup_steps: 8000
+report_every: 100
+
+# Transformer architecture
+decoder_type: transformer
+encoder_type: transformer
+word_vec_size: 256
+rnn_size: 256
+layers: 4
+transformer_ff: 2048
+heads: 8
+global_attention: general
+global_attention_function: softmax
+self_attn_type: scaled-dot
+
+# Solver options
+accum_count: 4
+optim: adam
+adam_beta1: 0.9
+adam_beta2: 0.998
+decay_method: noam
+learning_rate: 2.0
+max_grad_norm: 0.0
+early_stopping: 4  # in validation epochs - will use accuracy and ppl as scores
+
+# Batch options 
+batch_size: 4096
+batch_type: tokens
+normalization: tokens
+dropout: 0.1
+label_smoothing: 0.0
+max_generator_batches: 32
+param_init: 0.0
+param_init_glorot: True
+position_encoding: True
+share_embeddings: False
+
+# # Train on 4 GPU
+# world_size: 1 
+# gpu_ranks:
+# - 0
+# - 1
+# - 2
+# - 3
+
+# Train on 1 GPU
+world_size: 1 
+gpu_ranks:
+- 3

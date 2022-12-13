@@ -1,0 +1,19 @@
+# Model checkpoint
+model: ./logs/$SPEC_FOLDER/$EMBED_TYPE/ckpts/model_step_$N_STEPS.pt
+
+# Test data to use
+src: ./data/$SPEC_FOLDER/src-test.txt
+tgt: ./data/$SPEC_FOLDER/tgt-test.txt
+
+# Batch options 
+batch_size: 4096
+batch_type: tokens
+
+# Run options
+beam_size: 10
+
+# Where results are saved
+output: ./logs/$SPEC_FOLDER/$EMBED_TYPE/test_predictions.txt
+
+# Which GPU to use
+gpu: 3

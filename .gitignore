@@ -127,3 +127,12 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Custom
+logs/*
+config/*
+data/product-pred/*
+data/reactant-pred/*
+data/reactant-pred-noreag/*
+data/reactant-pred-single/*
+data/reagent-pred/*

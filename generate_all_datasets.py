@@ -42,7 +42,7 @@ def create_selfies_datasets():
     print('\nStarted generating selfies datasets from smiles datasets')
     for folder, _, files in os.walk('data'):
         if 'smiles' in folder and 'x1' in folder and 'x10' not in folder\
-            and '-single' not in folder and '-noreag' not in folder:
+        and '-single' not in folder and '-noreag' not in folder:
             for smiles_file in [f for f in files if '.txt' in f]:
                 smiles_full_path = os.path.join(folder, smiles_file)
                 write_selfies_file_from_smiles_file(smiles_full_path)
@@ -52,7 +52,7 @@ def create_spe_datasets():
     print('\nStarted generating spe datasets from atom-tokenized datasets')
     for folder, _, files in os.walk('data'):
         if 'atom' in folder and 'x1' in folder and 'x10' not in folder\
-            and '-single' not in folder and '-noreag' not in folder:
+        and '-single' not in folder and '-noreag' not in folder:
             for atom_file in [f for f in files if '.txt' in f]:
                 atom_full_path = os.path.join(folder, atom_file)
                 write_spe_file_from_atom_file(atom_full_path)
@@ -62,7 +62,7 @@ def create_w2v_embeddings():
     print('\nStarted generating w2v embeddings for all input combinations')
     for folder, _, _ in os.walk('data'):
         if 'x1' in folder and 'x10' not in folder\
-            and '-single' not in folder and '-noreag' not in folder:
+        and '-single' not in folder and '-noreag' not in folder:
             mol_data = load_rxn_molecules_for_w2v(folder)
             w2v_vectors = train_w2v_vectors(mol_data)
             write_embedding_vectors(folder, w2v_vectors)
@@ -285,3 +285,4 @@ def write_embedding_vectors(in_dir, w2v_vectors):
 
 if __name__ == '__main__':
     main()
+    
