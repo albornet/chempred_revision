@@ -214,7 +214,7 @@ def canonicalize_smiles(smiles):
 
 
 def create_selfies_from_smiles(smiles):
-    smiles = canonicalize_smiles(smiles.replace(' ', ''))  # needed?
+    smiles = smiles.replace(' ', '')
     try:
         selfies = sf.encoder(smiles)
     except sf.EncoderError:
@@ -223,32 +223,41 @@ def create_selfies_from_smiles(smiles):
 
 
 def create_selfies_from_smiles_molecule_by_molecule(smiles):
-    smiles_molecules = smiles.split('.')
-    selfies_molecules = []
-    for smiles_molecule in smiles_molecules:
+    smiles_mols = smiles.split('.')
+    selfies_mols = []
+    for smiles_mol in smiles_mols:
         try:
-            selfies_molecules.append(sf.encoder(smiles_molecule))
+            selfies_mol = sf.encoder(smiles_mol)
         except sf.EncoderError:
-            # Molecules that didn't work in the USPTO-MIT dataset:
-            # O=I(=O)Cl
-            # Cl[IH2](Cl)Cl
-            # O=[IH2]c1ccccc1
-            # F[P-](F)(F)(F)(F)F
-            # O=C(O)c1ccccc1I(=O)=O
-            # O=C1OI(=O)(O)c2ccccc21
-            # S=[Re](=S)(=S)(=S)(=S)(=S)=S
-            # CC1(C)O[IH2](C(F)(F)F)c2ccccc21
-            # C12C3C4C5C1[Fe]23451678C2C1C6C7C28
-            # C12C3C4C5C1[Zr]23451678C2C1C6C7C28
-            # O=C(OI(OC(=O)C(F)(F)F)c1ccccc1)C(F)(F)F
-            # CC(=O)OI1(OC(C)=O)(OC(C)=O)OC(=O)c2ccccc21
-            # Cc1ccc(S(=O)(=O)N=C2CCCC[IH2]2c2ccccc2)cc1
-            # O=C(O[IH2](OC(=O)C(F)(F)F)c1ccccc1)C(F)(F)F
-            # COc1cc2c(cc1OC)C([PH2](c1ccccc1)(c1ccccc1)c1ccccc1)OC2=O
-            # O=c1[nH]c2c3occc3c(F)c(F)c2n1-c1ccc([IH]S(=O)(=O)C2CC2COCc2ccccc2)cc1F
-            # print('This molecule didn''t work %s' % smiles_molecule)
-            selfies_molecules.append('?') # to preserve # molecules / rxn
-    return '.'.join(selfies_molecules)
+            selfies_mol = create_seflies_from_canonic_smiles(smiles_mol)
+        selfies_mols.append(selfies_mol)
+    return '.'.join(selfies_mols)
+
+
+def create_seflies_from_canonic_smiles(smiles_molecule):
+    smiles_molecule = canonicalize_smiles(smiles_molecule)
+    try:
+        return sf.encoder(smiles_molecule)
+    except sf.EncoderError:
+        return '?'  # to preserve # molecules / rxn
+    # Molecules that didn't work in the USPTO-MIT dataset:
+    # O=I(=O)Cl
+    # Cl[IH2](Cl)Cl
+    # O=[IH2]c1ccccc1
+    # F[P-](F)(F)(F)(F)F
+    # O=C(O)c1ccccc1I(=O)=O
+    # O=C1OI(=O)(O)c2ccccc21
+    # S=[Re](=S)(=S)(=S)(=S)(=S)=S
+    # CC1(C)O[IH2](C(F)(F)F)c2ccccc21
+    # C12C3C4C5C1[Fe]23451678C2C1C6C7C28
+    # C12C3C4C5C1[Zr]23451678C2C1C6C7C28
+    # O=C(OI(OC(=O)C(F)(F)F)c1ccccc1)C(F)(F)F
+    # CC(=O)OI1(OC(C)=O)(OC(C)=O)OC(=O)c2ccccc21
+    # Cc1ccc(S(=O)(=O)N=C2CCCC[IH2]2c2ccccc2)cc1
+    # O=C(O[IH2](OC(=O)C(F)(F)F)c1ccccc1)C(F)(F)F
+    # COc1cc2c(cc1OC)C([PH2](c1ccccc1)(c1ccccc1)c1ccccc1)OC2=O
+    # O=c1[nH]c2c3occc3c(F)c(F)c2n1-c1ccc([IH]S(=O)(=O)C2CC2COCc2ccccc2)cc1F
+    # print('This molecule didn''t work %s' % smiles_molecule)
 
 
 def load_rxn_molecules_for_w2v(data_dir_in):
