@@ -106,8 +106,7 @@ def write_spe_file_from_atom_file(atom_path):
 
 
 def generate_augmented_dataset(task, fold):
-    out_subdir = 'x%s-reag%s' % (fold)
-    out_fulldir = os.path.join('data', task, 'smiles', 'atom', out_subdir)
+    out_fulldir = os.path.join('data', task, 'smiles', 'atom', 'x%s' % fold)
     os.makedirs(out_fulldir, exist_ok=True)
     for split in SPLITS:
         write_smiles_files(out_fulldir, task, fold, split)
