@@ -5,9 +5,9 @@ from gensim.models import Word2Vec
 from itertools import product as combine
 
 
-TASKS = ['product-pred', 'reactant-pred']  #, 'reagent-pred', 'single-reactant-pred']
-INPUT_FORMATS = ['smiles']  #, 'selfies']
-TOKEN_SCHEMES = ['atom']  #, 'spe']
+TASKS = ['product-pred', 'reactant-pred', 'reagent-pred']
+INPUT_FORMATS = ['smiles', 'selfies']
+TOKEN_SCHEMES = ['atom', 'spe']
 
 
 def main():
@@ -18,9 +18,10 @@ def main():
 def create_w2v_embeddings(input_format, token_scheme):
     print('Repr: %s , token: %s' % (input_format, token_scheme))
     data_dir_in = os.path.join(
-        'data', TASKS[0], input_format, token_scheme, 'x1-reag+')
+        'data', TASKS[0], input_format, token_scheme, 'x1')
 
-    # Take reactions as sets of dot-separated molecules (to share embeddings)
+    # Consider reactions as sets of dot-separated molecules
+    # The goal is to share src and tgt embeddings for any task
     print(' - Loading data...')
     with open(os.path.join(data_dir_in, 'src-train.txt'), 'r') as f_src,\
          open(os.path.join(data_dir_in, 'tgt-train.txt'), 'r') as f_tgt:
