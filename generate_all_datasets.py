@@ -10,7 +10,6 @@ from rdkit import RDLogger
 RDLogger.DisableLog('rdApp.*')
 from SmilesPE.tokenizer import SPE_Tokenizer
 from gensim.models import Word2Vec
-from itertools import product as combine
 
 
 TASKS = ['product-pred', 'reactant-pred', 'reagent-pred',
@@ -24,9 +23,9 @@ SPE_ENCODER_PATH_SELFIES = os.path.join(ORIGINAL_DIR, 'spe_codes_selfies.txt')
 
 def main():
     random.seed(1234)  # this is enough for replicable augmentation
-    # create_smiles_datasets()  # original data -> all tasks & data augmentations
-    # create_selfies_datasets()  # smiles data -> selfies data
-    # create_spe_datasets()  # smiles and selfies atom data -> spe data
+    create_smiles_datasets()  # original data -> all tasks & data augmentations
+    create_selfies_datasets()  # smiles data -> selfies data
+    create_spe_datasets()  # smiles and selfies atom data -> spe data
     create_w2v_embeddings()  # smiles, selfies, atom, bpe -> added w2v vectors
 
 
