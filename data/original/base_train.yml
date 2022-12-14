@@ -9,7 +9,7 @@ share_vocab: True
 overwrite: True
 
 # Log file
-log_file: ./logs/$SPEC_FOLDER/$EMBED_TYPE/logs.log
+log_file: ./logs/$SPEC_FOLDER/$EMBED_TYPE/train_logs.log
 
 # Corpus opts
 data:

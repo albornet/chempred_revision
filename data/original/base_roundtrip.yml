@@ -1,0 +1,24 @@
+# Model checkpoint
+model: $LAST_CKPT_PATH  # product prediction model
+
+# Test data to use
+src: $DATA_FOLDER/test_predictions.txt  # predictions of the reactant prediction model
+
+# Batch options 
+batch_size: 4096
+batch_type: tokens
+
+# Run options
+beam_size: 10
+seed: 1234
+
+# Logging
+log_file: $LOGS_FOLDER/roundtrip_logs.txt
+verbose: True
+n_best: 10
+
+# Where results are saved
+output: $LOGS_FOLDER/roundtrip_predictions.txt  # product predictions, but written in the reactant prediction model logs
+
+# Which GPU to use
+gpu: 3
