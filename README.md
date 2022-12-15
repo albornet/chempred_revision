@@ -11,27 +11,32 @@ $ conda env create --name chempred_revision --file environments/environment.yml
 $ conda activate chempred_revision
 ```
 
-* Generate all required datasets and embedding vectors
+* Generate all required datasets and pre-trained embedding vectors
 ```
 $ python generate_all_datasets.py
 ```
 
-* Generate the configuration files used to run all simulations with open-nmt
+* Generate the configuration files used to train all models with open-nmt
 ```
-$ python generate_all_omt_configs.py
+$ python generate_train_configs.py
 ```
 
-* Train all models (this might take a while, approximately 200 days on a single GPU!)
+* Train all models (this takes a while, you might consider splitting the jobs on multiple GPUs!)
 ```
 $ python train_all_models.py
 ```
 
+* Generate the configuration files used to test all models and generate roundtrip datasets
+```
+$ python generate_all_test_and_roundtrip_configs.py
+```
+
 * Generate predictions using the test data, with all trained model, and write them to text files
 ```
-$ python test_all_models.py
+$ python test_and_roundtrip_all_models.py
 ```
 
 * Generate all figures with the results
 ```
-$ Yet to come!
+$ TODO: do
 ```

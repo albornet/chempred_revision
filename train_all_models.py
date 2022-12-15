@@ -7,6 +7,7 @@ FOLDS = [1, 2, 5, 10, 20]
 
 
 def main():
+    # Start by the run that take less time
     for fold in FOLDS:
         train_one_data_augmentation_level(fold)
 

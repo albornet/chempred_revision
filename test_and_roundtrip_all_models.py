@@ -7,11 +7,17 @@ FOLDS = [1, 2, 5, 10, 20]
 
 
 def main():
-    for folder, subfolders, files in os.walk(CONFIG_DIR):
-        if len(subfolders) == 0:
-            for file in files:  # ['test.yml'] or ['test.yml', 'config.yml']
-                config = os.path.join(folder, file)
-                os.system('%s -config %s' % (TEST_SCRIPT, config))
+    # First generate predictions with all possible models
+    generate_predictions_with_all_models(mode='test')
+    # Then only uses these predictions for the round-trip experiment
+    generate_predictions_with_all_models(mode='roundtrip')
+
+
+def generate_predictions_with_all_models(mode):
+    for folder, _, files in os.walk(CONFIG_DIR):
+        if '%s.yml' % mode in files:
+            config = os.path.join(folder, '%s.yml' % mode)
+            os.system('%s -config %s' % (TEST_SCRIPT, config))
 
 
 if __name__ == '__main__':
