@@ -5,30 +5,35 @@ DATA_DIR = os.path.join('.', 'data')
 LOGS_DIR = os.path.join('.', 'logs')
 CONFIG_DIR = os.path.join('.', 'config')
 BASE_CONFIG_PATH = os.path.join('data', 'original', 'base_test.yml')
+ROUNDTRIP_TASKS = ['reactant-pred', 'reactant-pred-noreag']
 
 
 def main():
-    generate_test_config_files()
+    generate_config_folder(mode='test')
     print('Testing configuration files generated!')
-    generate_roundtrip_config_files()
+    generate_config_folder(mode='roundtrip')
     print('Roundtrip configuration files generated')
 
 
-def generate_test_config_files():
+def generate_config_folder(mode):
     for folder, _, files in os.walk(LOGS_DIR):
         if os.path.split(folder)[-1] == 'ckpts' and len(files) > 0:
             ckpt_folder = folder
             logs_folder = os.path.split(ckpt_folder)[0]
-            write_test_config_file(ckpt_folder, logs_folder, mode='test')
+            write_config_file(ckpt_folder, logs_folder, mode)
 
 
-def generate_roundtrip_config_files():
-    for folder, _, files in os.walk(LOGS_DIR):
-        if os.path.split(folder)[-1] == 'ckpts' and len(files) > 0\
-        and ('reactant-pred' in folder or 'reactant-pred-noreag' in folder):
-            ckpt_folder = folder
-            logs_folder = os.path.split(ckpt_folder)[0]
-            write_test_config_file(ckpt_folder, logs_folder, mode='roundtrip')
+def write_config_file(ckpt_folder, logs_folder, mode):
+    if mode == 'roundtrip'\
+        and not any([s in ckpt_folder for s in ROUNDTRIP_TASKS]):        
+        return  # round-trip only happens for certain tasks
+    config_path, ckpt_path, data_folder =\
+        identify_folders_and_paths(ckpt_folder, logs_folder, mode)
+    to_write = open(BASE_CONFIG_PATH, 'r').read()
+    with open(config_path, 'w') as f:
+        f.writelines(to_write.replace('$LAST_CKPT_PATH', ckpt_path)\
+                             .replace('$DATA_FOLDER', data_folder)\
+                             .replace('$LOGS_FOLDER', logs_folder))
 
 
 def identify_folders_and_paths(logs_folder, ckpt_folder, mode):
@@ -42,16 +47,6 @@ def identify_folders_and_paths(logs_folder, ckpt_folder, mode):
         ckpt_path = ckpt_path.replace('reactant-pred', 'product-pred')\
                              .replace('reactant-pred-noreag', 'product-pred')
     return config_path, ckpt_path, data_folder
-
-
-def write_test_config_file(ckpt_folder, logs_folder, mode):
-    config_path, ckpt_path, data_folder =\
-        identify_folders_and_paths(ckpt_folder, logs_folder, mode)
-    to_write = open(BASE_CONFIG_PATH, 'r').read()  # new read to avoid overwrite
-    to_write = to_write.replace('$LAST_CKPT_PATH', ckpt_path)\
-                       .replace('$DATA_FOLDER', data_folder)\
-                       .replace('$LOGS_FOLDER', logs_folder)
-    with open(config_path, 'w') as f: f.writelines(to_write)
 
 
 if __name__ == '__main__':
