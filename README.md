@@ -5,7 +5,7 @@ This repository contains the code that was written to implement the revisions as
 
 How to reproduce the reported results
 -------------------------------------
-* Generate all required datasets and embedding vectors
+* Create an environment with the necessary packages (here with conda)
 ```
 $ conda env create --name chempred_revision --file environments/environment.yml
 $ conda activate chempred_revision
