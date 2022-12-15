@@ -7,6 +7,12 @@ How to reproduce the reported results
 -------------------------------------
 * Generate all required datasets and embedding vectors
 ```
+$ conda env create --name chempred_revision --file environments/environment.yml
+$ conda activate chempred_revision
+```
+
+* Generate all required datasets and embedding vectors
+```
 $ python generate_all_datasets.py
 ```
 
