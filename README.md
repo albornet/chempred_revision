@@ -28,7 +28,7 @@ $ python train_all_models.py
 
 * Generate the configuration files used to test all models and generate roundtrip datasets
 ```
-$ python generate_all_test_and_roundtrip_configs.py
+$ python generate_test_and_roundtrip_configs.py
 ```
 
 * Generate predictions using the test data, with all trained model, and write them to text files

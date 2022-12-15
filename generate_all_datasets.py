@@ -12,8 +12,14 @@ from SmilesPE.tokenizer import SPE_Tokenizer
 from gensim.models import Word2Vec
 
 
-TASKS = ['product-pred', 'reactant-pred', 'reagent-pred',
-         'reactant-pred-single', 'reactant-pred-noreag']
+TASKS = [
+    'product-pred',
+    'product-pred-noreag',
+    'reactant-pred',
+    'reactant-pred-noreag',
+    'reactant-pred-single',
+    'reagent-pred'
+]
 FOLDS = [1, 2, 5, 10, 20]
 SPLITS = ['test', 'val', 'train']
 ORIGINAL_DIR = os.path.join('data', 'original')
@@ -118,11 +124,10 @@ def write_smiles_files(out_dir, task, fold, split):
          open(os.path.join(out_dir, 'src-%s.txt' % split), 'w') as src_out,\
          open(os.path.join(out_dir, 'tgt-%s.txt' % split), 'w') as tgt_out:
 
-        noreag_flag = '-noreag' in task
         progress_bar = tqdm(zip(src_in.readlines(), tgt_in.readlines()))
         for src, tgt in progress_bar:
             progress_bar.set_description('------ Split %s' % split)
-            species = parse_rxn(src, tgt, noreag_flag)
+            species = parse_rxn(src, tgt)
             new_src, new_tgt = create_new_sample(task, **species)
             if len(new_src) == 0 or len(new_tgt) == 0: continue
             new_src, new_tgt = augment_sample(new_src, new_tgt, fold)
@@ -130,15 +135,12 @@ def write_smiles_files(out_dir, task, fold, split):
             tgt_out.write(new_tgt + '\n')
 
 
-def parse_rxn(src, tgt, noreag_flag):
+def parse_rxn(src, tgt):
     src, tgt = src.strip(), tgt.strip()
     if '  >' in src: src = src.replace('  >', ' > ')
     precursors = src.split(' > ')
-
     reactants, reagents = [p.split(' . ') for p in precursors]
-    if noreag_flag: reagents = []
     products = tgt.split(' . ')  # should we pick only the largest?
-
     return {'reactants': [r for r in reactants if r != ''],\
             'reagents': [r for r in reagents if r != ''],\
             'products': [p for p in products if p != '']}
@@ -148,17 +150,23 @@ def create_new_sample(task, reactants, reagents, products):
     if task == 'product-pred':
         new_src = ' . '.join(reactants + reagents)
         new_tgt = ' . '.join(products)
-    elif task in ['reactant-pred', 'reactant-pred-noreag']:
+    if task == 'product-pred-noreag':
+        new_src = ' . '.join(reactants)
+        new_tgt = ' . '.join(products)
+    elif task == 'reactant-pred':
         new_src = ' . '.join(reagents + products)
         new_tgt = ' . '.join(reactants)
-    elif task == 'reagent-pred':
-        new_src = ' . '.join(reactants + products)
-        new_tgt = ' . '.join(reagents)
+    elif task == 'reactant-pred-noreag':
+        new_src = ' . '.join(products)
+        new_tgt = ' . '.join(reactants)
     elif task == 'reactant-pred-single':
         single_react = random.sample(reactants, 1)  # list
         other_reacts = [r for r in reactants if r != single_react]
         new_src = ' . '.join(other_reacts + reagents + products)
         new_tgt = ' . '.join(single_react)
+    elif task == 'reagent-pred':
+        new_src = ' . '.join(reactants + products)
+        new_tgt = ' . '.join(reagents)
     else:
         raise ValueError('Bad task name')
     return new_src, new_tgt
