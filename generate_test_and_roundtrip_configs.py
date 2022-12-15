@@ -10,6 +10,7 @@ ROUNDTRIP_SPECS = ['atom', 'smiles', 'from-scratch']
 
 
 def main():
+    reset_test_and_roundtrip_configs()
     generate_config_folder(mode='test')
     print('Testing configuration files generated!')
     generate_config_folder(mode='roundtrip')
@@ -44,10 +45,10 @@ def check_if_roundtrip_should_be_run(folder):
     return True
 
 
-def identify_folders_and_paths(logs_folder, ckpt_folder, mode):
-    base_folder = os.path.split(logs_folder)[0]  # remove embed type subfolder
-    data_folder = base_folder.replace(LOGS_DIR, DATA_DIR)
-    config_folder = base_folder.replace(LOGS_DIR, CONFIG_DIR)
+def identify_folders_and_paths(ckpt_folder, logs_folder, mode):
+    data_folder = os.path.split(logs_folder)[0]  # remove embed type subfolder
+    data_folder = data_folder.replace(LOGS_DIR, DATA_DIR)
+    config_folder = logs_folder.replace(LOGS_DIR, CONFIG_DIR)
     config_path = os.path.join(config_folder, '%s.yml' % mode)
     ckpt_path = os.path.join(ckpt_folder, os.listdir(ckpt_folder)[-1])  # last
     if mode == 'roundtrip':  # exchange input data and prediction model
