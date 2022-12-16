@@ -36,7 +36,13 @@ $ python generate_test_and_roundtrip_configs.py
 $ python test_and_roundtrip_all_models.py
 ```
 
-* Generate all figures with the results
+* Evaluate the performance of all models (top-k and roundtrip)
 ```
-$ TODO: do
+$ compute_topk_and_roundtrip_accuracy.py
 ```
+
+* Generate figures with the results
+```
+$ create_figures_x_and_y.py  # coming soon
+```
+
