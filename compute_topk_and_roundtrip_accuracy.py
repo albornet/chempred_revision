@@ -1,4 +1,5 @@
 import os
+import csv 
 import selfies as sf
 from tqdm import tqdm
 from rdkit import Chem
@@ -17,14 +18,16 @@ def main():
 
 
 def evaluate_models(mode):
+    with open('%s.csv' % mode, 'w') as f:
+        headers = ['model'] + ['top-%s' % k for k in TOPKS]
+        writer = csv.writer(f); writer.writerow(headers)
     for folder, _, files in os.walk(LOGS_DIR):
         if '%s_predictions.txt' % mode in files:
             print('Starting %s' % folder)
             pred_path = os.path.join(folder, '%s_predictions.txt' % mode)
             gold_dir = os.path.split(folder)[0].replace(LOGS_DIR, DATA_DIR)
-            if mode == 'roundtrip':
-                gold_dir = gold_dir.replace('reactant', 'product')
-            gold_path = os.path.join(gold_dir, 'tgt-test.txt')  # always 'test'
+            gold_flag = 'src' if mode == 'roundtrip' else 'tgt'
+            gold_path = os.path.join(gold_dir, '%s-test.txt' % gold_flag)
             compute_model_topk_accuracy(pred_path, gold_path, mode)
 
 
@@ -33,15 +36,18 @@ def compute_model_topk_accuracy(pred_path, gold_path, mode):
     n_preds_per_gold = len(all_preds) // len(all_golds)
     topks = [1] if mode == 'rountrip' else TOPKS
     topk_hits = {k: [] for k in topks}
+    
     progress_bar = tqdm(list(enumerate(all_golds)))
     for i, gold in progress_bar:
         progress_bar.set_description('Computing %s accuracy' % mode)
         preds = all_preds[i * n_preds_per_gold:(i + 1) * n_preds_per_gold]
         preds, gold = standardize_molecules(preds, gold, pred_path)
         [topk_hits[k].append(compute_topk_hit(preds[:k], gold)) for k in topks]
-    for k in topks:
-        topk_accuracy = sum(topk_hits[k]) / len(topk_hits[k])
-        print('---- Top-%s accuracy: %s' % (k, topk_accuracy))
+    
+    topk_data = [pred_path] + [sum(v) / len(v) for v in topk_hits.values()]
+    result_flag = 'roundtrip' if mode == 'roundtrip' else 'topk'
+    with open('results_%s.csv' % result_flag, 'a') as f:
+        writer = csv.writer(f); writer.writerow(topk_data)
 
 
 def read_pred_and_data(pred_path, gold_path):
