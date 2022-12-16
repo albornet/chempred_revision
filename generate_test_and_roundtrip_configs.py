@@ -4,7 +4,7 @@ import os
 DATA_DIR = os.path.join('.', 'data')
 LOGS_DIR = os.path.join('.', 'logs')
 CONFIG_DIR = os.path.join('.', 'config')
-BASE_CONFIG_PATH = os.path.join('data', 'original', 'base_test.yml')
+BASE_CONFIG_PATH = os.path.join('data', 'original', 'base_$MODE.yml')
 ROUNDTRIP_TASKS = ['reactant-pred', 'reactant-pred-noreag']
 ROUNDTRIP_SPECS = ['atom', 'smiles', 'from-scratch']
 
@@ -30,7 +30,7 @@ def write_config_file(ckpt_folder, logs_folder, mode):
         if not check_if_roundtrip_should_be_run(ckpt_folder): return
     config_path, ckpt_path, data_folder =\
         identify_folders_and_paths(ckpt_folder, logs_folder, mode)
-    to_write = open(BASE_CONFIG_PATH, 'r').read()
+    to_write = open(BASE_CONFIG_PATH.replace('$MODE', mode), 'r').read()
     with open(config_path, 'w') as f:
         f.writelines(to_write.replace('$LAST_CKPT_PATH', ckpt_path)\
                              .replace('$DATA_FOLDER', data_folder)\

@@ -132,6 +132,7 @@ dmypy.json
 logs/*
 config/*
 data/product-pred/*
+data/product-pred-noreag/*
 data/reactant-pred/*
 data/reactant-pred-noreag/*
 data/reactant-pred-single/*

@@ -119,6 +119,7 @@ def generate_augmented_dataset(task, fold):
 
 
 def write_smiles_files(out_dir, task, fold, split):
+    if split != 'train': fold = 1  # no augmentation for test and valid data
     with open(os.path.join(ORIGINAL_DIR, 'src-%s.txt' % split), 'r') as src_in,\
          open(os.path.join(ORIGINAL_DIR, 'tgt-%s.txt' % split), 'r') as tgt_in,\
          open(os.path.join(out_dir, 'src-%s.txt' % split), 'w') as src_out,\
@@ -150,7 +151,7 @@ def create_new_sample(task, reactants, reagents, products):
     if task == 'product-pred':
         new_src = ' . '.join(reactants + reagents)
         new_tgt = ' . '.join(products)
-    if task == 'product-pred-noreag':
+    elif task == 'product-pred-noreag':
         new_src = ' . '.join(reactants)
         new_tgt = ' . '.join(products)
     elif task == 'reactant-pred':
