@@ -1,41 +1,47 @@
 import os
 import selfies as sf
+from tqdm import tqdm
 from rdkit import Chem
 from rdkit import RDLogger
 RDLogger.DisableLog('rdApp.*')
 
 
-ALL_KS = [1, 3, 5, 10]
-LOGS_DIR = os.path.join('.', 'config')
+TOPKS = [1, 3, 5, 10]
+LOGS_DIR = os.path.join('.', 'logs')
 DATA_DIR = os.path.join('.', 'data')
 
 
-def main(debug_mode=False):
-    if debug_mode:
-        debug(); return
+def main():
+    evaluate_models('test')
+    evaluate_models('roundtrip')
+
+
+def evaluate_models(mode):
     for folder, _, files in os.walk(LOGS_DIR):
-        if '%s.yml' % mode in files:
-            config_path = os.path.join(folder, '%s.yml' % mode)
-    
-
-def debug():
-    pred_path = './example_test_predictions.txt'
-    gold_path = './example_tgt-test.txt'
-    print('Model: %s' % pred_path)
-    for k in ALL_KS:
-        compute_model_topk_accuracy(pred_path, gold_path, k)
+        if '%s_predictions.txt' % mode in files:
+            print('Starting %s' % folder)
+            pred_path = os.path.join(folder, '%s_predictions.txt' % mode)
+            gold_dir = os.path.split(folder)[0].replace(LOGS_DIR, DATA_DIR)
+            if mode == 'roundtrip':
+                gold_dir = gold_dir.replace('reactant', 'product')
+            gold_path = os.path.join(gold_dir, 'tgt-test.txt')  # always 'test'
+            compute_model_topk_accuracy(pred_path, gold_path, mode)
 
 
-def compute_model_topk_accuracy(pred_path, gold_path, k):
+def compute_model_topk_accuracy(pred_path, gold_path, mode):
     all_preds, all_golds = read_pred_and_data(pred_path, gold_path)
     n_preds_per_gold = len(all_preds) // len(all_golds)
-    topk_hits = []
-    for i, gold in enumerate(all_golds):
-        preds = all_preds[i * n_preds_per_gold:i * n_preds_per_gold + k]
+    topks = [1] if mode == 'rountrip' else TOPKS
+    topk_hits = {k: [] for k in topks}
+    progress_bar = tqdm(list(enumerate(all_golds)))
+    for i, gold in progress_bar:
+        progress_bar.set_description('Computing %s accuracy' % mode)
+        preds = all_preds[i * n_preds_per_gold:(i + 1) * n_preds_per_gold]
         preds, gold = standardize_molecules(preds, gold, pred_path)
-        topk_hits.append(compute_topk_hit(preds, gold))
-    topk_accuracy = sum(topk_hits) / len(topk_hits)
-    print('-- Top-%s accuracy: %s' % (k, topk_accuracy))
+        [topk_hits[k].append(compute_topk_hit(preds[:k], gold)) for k in topks]
+    for k in topks:
+        topk_accuracy = sum(topk_hits[k]) / len(topk_hits[k])
+        print('---- Top-%s accuracy: %s' % (k, topk_accuracy))
 
 
 def read_pred_and_data(pred_path, gold_path):
