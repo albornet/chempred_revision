@@ -41,7 +41,7 @@ C O C ( = O ) C ( = O ) C ( = O ) C ( = O ) C ( = O ) C ( = O ) C ( = O ) C ( = 
 C O c 1 c c c ( = O ) c 2 c c c c 1
 C O c 1 c c c ( = O ) c 2 c c c c c 1
 C O c 1 c c ( = O ) c 2 c c c c c c 1
-C O c 1 c c c ( = O ) c 2 c c c c c c 1
+O C c 1 c n c c ( Cl ) c 1 C O C 1 C C C C O 1
 C O c 1 c c ( = O ) c 2 c c c c c c c 1
 C O c 1 c c c ( = O ) c 2 c c c c c c c 1
 C O c 1 c c ( = O ) c 2 c c c c c c c c 1
