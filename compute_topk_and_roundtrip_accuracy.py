@@ -8,6 +8,7 @@ RDLogger.DisableLog('rdApp.*')
 
 
 TOPKS = [1, 3, 5, 10]
+HEADERS = ['model'] + ['top-%s' % k for k in TOPKS]
 LOGS_DIR = os.path.join('.', 'logs')
 DATA_DIR = os.path.join('.', 'data')
 
@@ -19,8 +20,7 @@ def main():
 
 def evaluate_models(mode):
     with open('%s.csv' % mode, 'w') as f:
-        headers = ['model'] + ['top-%s' % k for k in TOPKS]
-        writer = csv.writer(f); writer.writerow(headers)
+        writer = csv.writer(f); writer.writerow(HEADERS)
     for folder, _, files in os.walk(LOGS_DIR):
         if '%s_predictions.txt' % mode in files:
             print('Starting %s' % folder)
@@ -69,7 +69,7 @@ def standardize_molecules(preds, gold, pred_path):
 
 def compute_topk_hit(preds, gold):
     # Requirement: at least one of preds (list of length k) is accurate
-    return any([compute_hit(pred.split('.'), gold.split('.')) for pred in preds])
+    return any([compute_hit(p.split('.'), gold.split('.')) for p in preds])
 
 
 def compute_hit(pred_molecules, gold_molecules):
