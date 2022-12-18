@@ -14,7 +14,7 @@ seed: 1234
 
 # Logging
 log_file: $LOGS_FOLDER/roundtrip_logs.txt
-verbose: True
+verbose: False
 n_best: 10
 
 # Where results are saved
