@@ -8,7 +8,8 @@ RDLogger.DisableLog('rdApp.*')
 
 
 TOPKS = [1, 3, 5, 10]
-HEADERS = ['model'] + ['top-%s' % k for k in TOPKS]
+HEADERS = ['task', 'format', 'token', 'embed', 'augment'] +\
+          ['top-%s' % k for k in TOPKS]
 LOGS_DIR = os.path.join('.', 'logs')
 DATA_DIR = os.path.join('.', 'data')
 
@@ -19,8 +20,7 @@ def main():
 
 
 def evaluate_models(mode):
-    with open('%s.csv' % mode, 'w') as f:
-        writer = csv.writer(f); writer.writerow(HEADERS)
+    write_result_line(HEADERS, mode, 'w')  # initialize result file
     for folder, _, files in os.walk(LOGS_DIR):
         if '%s_predictions.txt' % mode in files:
             print('Starting %s' % folder)
@@ -32,11 +32,13 @@ def evaluate_models(mode):
 
 
 def compute_model_topk_accuracy(pred_path, gold_path, mode):
+    # Retrieve model data and initialize parameters
     all_preds, all_golds = read_pred_and_data(pred_path, gold_path)
     n_preds_per_gold = len(all_preds) // len(all_golds)
     topks = [1] if mode == 'rountrip' else TOPKS
     topk_hits = {k: [] for k in topks}
     
+    # Compute all top-k accuracies for this model
     progress_bar = tqdm(list(enumerate(all_golds)))
     for i, gold in progress_bar:
         progress_bar.set_description('Computing %s accuracy' % mode)
@@ -44,10 +46,12 @@ def compute_model_topk_accuracy(pred_path, gold_path, mode):
         preds, gold = standardize_molecules(preds, gold, pred_path)
         [topk_hits[k].append(compute_topk_hit(preds[:k], gold)) for k in topks]
     
-    topk_data = [pred_path] + [sum(v) / len(v) for v in topk_hits.values()]
-    result_flag = 'roundtrip' if mode == 'roundtrip' else 'topk'
-    with open('results_%s.csv' % result_flag, 'a') as f:
-        writer = csv.writer(f); writer.writerow(topk_data)
+    # Write results for this model in a common file
+    _, task, format, token, augment, embed, _ =\
+        pred_path.split(LOGS_DIR)[-1].split(os.path.sep)
+    model_specs = [task, format, token, embed, augment]
+    topk_data = model_specs + [sum(v) / len(v) for v in topk_hits.values()]
+    write_result_line(topk_data, mode, 'a')
 
 
 def read_pred_and_data(pred_path, gold_path):
@@ -82,6 +86,12 @@ def canonicalize_smiles(smiles):
         return Chem.MolToSmiles(Chem.MolFromSmiles(smiles))
     except:  # Boost.Python.ArgumentError
         return smiles
+
+
+def write_result_line(content, mode, write_or_append):
+    result_flag = 'roundtrip' if mode == 'roundtrip' else 'topk'
+    with open('results_%s.csv' % result_flag, write_or_append) as f:
+        writer = csv.writer(f); writer.writerow(content)
 
 
 if __name__ == '__main__':

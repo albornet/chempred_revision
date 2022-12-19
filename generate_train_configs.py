@@ -3,7 +3,7 @@ import os
 
 CONFIG_DIR = os.path.join('.', 'config')
 LOGS_DIR = os.path.join('.', 'logs')
-N_BASE_STEPS = 500  # 000
+N_BASE_STEPS = 500000
 EMBED_TYPES = ['from-scratch', 'pre-trained']
 W2V_TEXT = """
 # Add pre-trained embeddings
