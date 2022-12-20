@@ -291,12 +291,12 @@ def train_w2v_vectors(sentences):
     return model.wv
 
 
-def write_embedding_vectors(in_dir, w2v_vectors):
-    print('-- Writing w2v embeddings for %s' % in_dir)
-    w2v_vectors.save(os.path.join(in_dir, 'w2v.wordvectors'))
+def write_embedding_vectors(in_dir, embedding_vectors):
+    print('-- Writing embeddings vectors for %s' % in_dir)
+    embedding_vectors.save(os.path.join(in_dir, 'w2v.wordvectors'))
     with open(os.path.join(in_dir, 'w2v-embeddings.txt'), 'w') as f:
-        for token in w2v_vectors.index_to_key:
-            vector = w2v_vectors[token].tolist()
+        for token in embedding_vectors.index_to_key:
+            vector = embedding_vectors[token].tolist()
             f.write(token + ' ' + ' '.join(list(map(str, vector))) + '\n')
 
 
