@@ -66,15 +66,16 @@ param_init_glorot: True
 position_encoding: True
 share_embeddings: False
 
-# # Train on 4 GPU
-# world_size: 1 
-# gpu_ranks:
-# - 0
-# - 1
-# - 2
-# - 3
-
-# Train on 1 GPU
+# Processes
+num_workers: 4
 world_size: 1 
 gpu_ranks:
 - 3
+
+# # Processes
+# num_workers: 2
+# world_size: 1
+# gpu_ranks:
+# - 3
+# - 2
+# - 1

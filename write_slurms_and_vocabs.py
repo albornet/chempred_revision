@@ -11,17 +11,16 @@ FOLDS = [1, 2, 5, 10, 20]
 def main():
     # Separate folders by data augmentation fold (take different times)
     for fold in FOLDS:
-        train_one_data_augmentation_level(fold)
+        write_slurms_for_one_data_augmentation_level(fold)
 
 
-def train_one_data_augmentation_level(fold):
+def write_slurms_for_one_data_augmentation_level(fold):
     for folder, _, files in os.walk('./config'):
         if 'train.yml' in files\
         and str(fold) in folder and str(10 * fold) not in folder:
             config_path = os.path.join(folder, 'train.yml')
             os.system('%s -config %s -n_sample -1' % (VOCAB_SCRIPT, config_path))
             write_slurm_script(config_path, fold)
-            # os.system('%s -config %s' % (TRAIN_SCRIPT, config))
 
 
 def write_slurm_script(config_path, fold):
