@@ -23,7 +23,7 @@ data:
 # Place to save the checkpoints
 save_model: ./logs/$SPEC_FOLDER/$EMBED_TYPE/ckpts/model
 save_checkpoint_steps: 10000
-keep_checkpoint: 20
+keep_checkpoint: 5
 seed: 1234
 
 # Training steps
@@ -52,7 +52,7 @@ adam_beta2: 0.998
 decay_method: noam
 learning_rate: 2.0
 max_grad_norm: 0.0
-early_stopping: 10  # in validation epochs - will use accuracy and ppl as scores
+early_stopping: 5  # in validation epochs - will use accuracy and ppl as scores
 
 # Batch options 
 batch_size: 4096
