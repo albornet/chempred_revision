@@ -18,11 +18,13 @@ $ python generate_all_datasets.py
 
 * Train all models (long step! here are two different ways)
 ```
-$ FOR BOTH CASES
+$ FOR BOTH WAYS
 $ python write_train_configs.py  # write configuration files for training
+$
 $ # THN, EITHER RUN IT ON YOUR OWN COMPUTER / SERVER (WITH AT LEAST 1 GPU)
 $ python write_vocab_and_slurm_files.py -v  # vocabulary generation
 $ python train_all_models.py  # all training scripts run one by one
+$
 $ # OR RUN IT ON AN HPC CLUSTER
 $ # You should adapt ./data/original/base_slurm.sh to your needs
 $ # You should install a conda environment named "chempred_revision" on your personal HPC space, where open-nmt is installed with "pip install -e ." from ./open-nmt)
