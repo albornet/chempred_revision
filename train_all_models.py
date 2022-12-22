@@ -1,6 +1,7 @@
 import os
 
 
+CONFIGS_DIR = os.path.join('.', 'configs')
 VOCAB_SCRIPT = 'python open-nmt/build_vocab.py'
 TRAIN_SCRIPT = 'python open-nmt/train.py'
 FOLDS = [1, 2, 5, 10, 20]
@@ -13,7 +14,7 @@ def main():
 
 
 def train_one_data_augmentation_level(fold):
-    for folder, subfolders, _ in os.walk('./config'):
+    for folder, subfolders, _ in os.walk(CONFIGS_DIR):
         if len(subfolders) == 0\
         and str(fold) in folder and str(10 * fold) not in folder:
             config = os.path.join(folder, 'train.yml')

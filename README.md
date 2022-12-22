@@ -16,9 +16,9 @@ $ conda activate chempred_revision
 $ python generate_all_datasets.py
 ```
 
-* Generate the configuration files used to train all models with open-nmt
+* Write the configuration files used to train all models with open-nmt
 ```
-$ python generate_train_configs.py
+$ python write_train_configs.py
 ```
 
 * Train all models (this takes a while, you might consider splitting the jobs on multiple GPUs!)
@@ -28,7 +28,7 @@ $ python train_all_models.py
 
 * Generate the configuration files used to test all models and generate roundtrip datasets
 ```
-$ python generate_test_and_roundtrip_configs.py
+$ python write_test_and_roundtrip_configs.py
 ```
 
 * Generate predictions using the test data, with all trained model, and write them to text files

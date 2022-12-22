@@ -2,11 +2,11 @@
 #
 #SBATCH --partition=private-teodoro-gpu
 #SBATCH --time=06:00:00
-#SBATCH --gpus=RTX_3090
+#SBATCH --gpus=1
 #SBATCH --cpus-per-task 2
 #SBATCH --mem-per-cpu=8000
-#SBATCH --output=$SLURM_LOGS_PATH
-#SBATCH --error=$SLURM_ERRS_PATH
+#SBATCH --output=$SLURM_LOG_PATH
+#SBATCH --error=$SLURM_ERR_PATH
 
 module load Anaconda3/2022.05
 source activate chempred_revision

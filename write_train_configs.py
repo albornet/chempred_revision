@@ -1,7 +1,7 @@
 import os
 
 
-CONFIG_DIR = os.path.join('.', 'config')
+CONFIGS_DIR = os.path.join('.', 'configs')
 LOGS_DIR = os.path.join('.', 'logs')
 N_BASE_STEPS = 500000
 EMBED_TYPES = ['from-scratch', 'pre-trained']
@@ -29,7 +29,7 @@ def main():
 def setup_train_configs(data_folder, embed_types_for_this_data):
     spec_path = os.path.join(*data_folder.split(os.path.sep)[1:])
     for embed_type in embed_types_for_this_data:
-        config_folder = os.path.join(CONFIG_DIR, spec_path, embed_type)
+        config_folder = os.path.join(CONFIGS_DIR, spec_path, embed_type)
         logs_folder = os.path.join(LOGS_DIR, spec_path, embed_type)
         os.makedirs(config_folder, exist_ok=True)
         os.makedirs(logs_folder, exist_ok=True)
@@ -48,7 +48,7 @@ def write_train_config_file(config_folder):
 
 def apply_parameters_to_config_file(to_write, config_folder):
     spec_folder, embed_type = os.path.split(config_folder)
-    spec_folder = spec_folder.replace(CONFIG_DIR, '')[1:]  # no '/' at base
+    spec_folder = spec_folder.replace(CONFIGS_DIR, '')[1:]  # no '/' at base
     n_steps = str(int(spec_folder.split('x')[-1]) * N_BASE_STEPS)
     return to_write.replace('$SPEC_FOLDER', spec_folder)\
                    .replace('$EMBED_TYPE', embed_type)\

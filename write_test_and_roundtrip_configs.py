@@ -3,7 +3,7 @@ import os
 
 DATA_DIR = os.path.join('.', 'data')
 LOGS_DIR = os.path.join('.', 'logs')
-CONFIG_DIR = os.path.join('.', 'config')
+CONFIGS_DIR = os.path.join('.', 'configs')
 BASE_CONFIG_PATH = os.path.join('data', 'original', 'base_$MODE.yml')
 ROUNDTRIP_TASKS = ['reactant-pred', 'reactant-pred-noreag']
 ROUNDTRIP_SPECS = ['atom', 'smiles', 'from-scratch']
@@ -48,7 +48,7 @@ def check_if_roundtrip_should_be_run(folder):
 def identify_folders_and_paths(ckpt_folder, logs_folder, mode):
     data_folder = os.path.split(logs_folder)[0]  # remove embed type subfolder
     data_folder = data_folder.replace(LOGS_DIR, DATA_DIR)
-    config_folder = logs_folder.replace(LOGS_DIR, CONFIG_DIR)
+    config_folder = logs_folder.replace(LOGS_DIR, CONFIGS_DIR)
     config_path = os.path.join(config_folder, '%s.yml' % mode)
     ckpt_path = os.path.join(ckpt_folder, os.listdir(ckpt_folder)[-1])  # last
     if mode == 'roundtrip':  # exchange input data and prediction model
@@ -58,7 +58,7 @@ def identify_folders_and_paths(ckpt_folder, logs_folder, mode):
 
 
 def reset_test_and_roundtrip_configs():
-    for folder, _, files in os.walk(CONFIG_DIR):
+    for folder, _, files in os.walk(CONFIGS_DIR):
         if 'roundtrip.yml' in files:
             to_remove = os.path.join(folder, 'roundtrip.yml')
             os.system('rm %s' % to_remove)

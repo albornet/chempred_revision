@@ -2,7 +2,7 @@ import os
 
 
 TEST_SCRIPT = 'python open-nmt/translate.py'
-CONFIG_DIR = os.path.join('.', 'config')
+CONFIGS_DIR = os.path.join('.', 'configs')
 FOLDS = [1, 2, 5, 10, 20]
 
 
@@ -14,7 +14,7 @@ def main():
 
 
 def generate_predictions_with_all_models(mode):
-    for folder, _, files in os.walk(CONFIG_DIR):
+    for folder, _, files in os.walk(CONFIGS_DIR):
         if '%s.yml' % mode in files:
             config_path = os.path.join(folder, '%s.yml' % mode)
             print('Starting %s' % config_path)

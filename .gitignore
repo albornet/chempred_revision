@@ -130,7 +130,7 @@ dmypy.json
 
 # Custom
 logs/*
-config/*
+configs/*
 slurm/*
 data/product-pred/*
 data/product-pred-noreag/*
