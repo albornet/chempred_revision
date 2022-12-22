@@ -16,33 +16,28 @@ $ conda activate chempred_revision
 $ python generate_all_datasets.py
 ```
 
-* Write the configuration files used to train all models with open-nmt
+* Train all models (long step! here are two different ways)
 ```
-$ python write_train_configs.py
-```
-
-* Train all models (this takes a while, you might consider splitting the jobs on multiple GPUs!)
-```
-$ python train_all_models.py
-```
-
-* Generate the configuration files used to test all models and generate roundtrip datasets
-```
-$ python write_test_and_roundtrip_configs.py
+$ FOR BOTH CASES
+$ python write_train_configs.py  # write configuration files for training
+$ # THN, EITHER RUN IT ON YOUR OWN COMPUTER / SERVER (WITH AT LEAST 1 GPU)
+$ python write_vocab_and_slurm_files.py -v  # vocabulary generation
+$ python train_all_models.py  # all training scripts run one by one
+$ # OR RUN IT ON AN HPC CLUSTER
+$ # You should adapt ./data/original/base_slurm.sh to your needs
+$ # You should install a conda environment named "chempred_revision" on your personal HPC space, where open-nmt is installed with "pip install -e ." from ./open-nmt)
+$ python write_vocab_and_slurm_files.py -v -s  # vocabulary and slurm script generation
+$ sbatch slurm/<path_to_slurm_file>  # do this for all slurm files located in ./slurm (they are grouped by runtime)
 ```
 
 * Generate predictions using the test data, with all trained model, and write them to text files
 ```
-$ python test_and_roundtrip_all_models.py
+$ python write_test_and_roundtrip_configs.py  # write configuration files for testing
+$ python test_and_roundtrip_all_models.py  # generate predictions for all models
 ```
 
-* Evaluate the performance of all models (top-k and roundtrip)
+* Evaluate the performance of all models (top-k and roundtrip) and generate all figures
 ```
 $ compute_topk_and_roundtrip_accuracy.py
-```
-
-* Generate figures with the results
-```
 $ create_figures_x_and_y.py  # coming soon
 ```
-
