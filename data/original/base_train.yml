@@ -70,12 +70,7 @@ share_embeddings: False
 num_workers: 4
 world_size: 1 
 gpu_ranks:
-- 3
-
-# # Processes
-# num_workers: 2
-# world_size: 1
-# gpu_ranks:
-# - 3
+- 0
 # - 2
 # - 1
+# - 0
