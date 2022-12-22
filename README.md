@@ -21,7 +21,7 @@ $ python generate_all_datasets.py
 $ FOR BOTH WAYS
 $ python write_train_configs.py  # write configuration files for training
 $
-$ # THN, EITHER RUN IT ON YOUR OWN COMPUTER / SERVER (WITH AT LEAST 1 GPU)
+$ # THEN, EITHER RUN IT ON YOUR OWN COMPUTER / SERVER (WITH AT LEAST 1 GPU)
 $ python write_vocab_and_slurm_files.py -v  # vocabulary generation
 $ python train_all_models.py  # all training scripts run one by one
 $
