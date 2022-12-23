@@ -1,13 +1,13 @@
 import os
 import re
 import random
-# import selfies as sf
+import selfies as sf
 import warnings
 warnings.filterwarnings('ignore', category=UserWarning)
 from tqdm import tqdm
-# from rdkit import Chem
-# from rdkit import RDLogger
-# RDLogger.DisableLog('rdApp.*')
+from rdkit import Chem
+from rdkit import RDLogger
+RDLogger.DisableLog('rdApp.*')
 from SmilesPE.tokenizer import SPE_Tokenizer
 from gensim.models import Word2Vec
 
