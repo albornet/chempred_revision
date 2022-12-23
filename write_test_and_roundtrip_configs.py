@@ -34,7 +34,8 @@ def write_config_file(ckpt_folder, logs_folder, mode):
     with open(config_path, 'w') as f:
         f.writelines(to_write.replace('$LAST_CKPT_PATH', ckpt_path)\
                              .replace('$DATA_FOLDER', data_folder)\
-                             .replace('$LOGS_FOLDER', logs_folder))
+                             .replace('$LOGS_FOLDER', logs_folder)\
+                             .replace('$SEP', os.path.sep))
 
 
 def check_if_roundtrip_should_be_run(folder):

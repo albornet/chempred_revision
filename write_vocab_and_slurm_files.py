@@ -6,13 +6,14 @@ parser.add_argument('-s', '--slurm', action='store_true')
 args = parser.parse_args()
 
 
-CONFIGS_DIR = os.path.join('.', 'configs')
-LOGS_DIR = os.path.join('.', 'logs')
-SLURM_DIR = os.path.join('.', 'slurm')
+CONFIGS_DIR = os.path.abspath('configs')
+LOGS_DIR = os.path.abspath('logs')
+DATA_DIR = os.path.abspath('data')
+SLURM_DIR = os.path.abspath('slurm')
+BASE_SLURM_PATH = os.path.join(DATA_DIR, 'original', 'base_slurm.sh')
 VOCAB_SCRIPT = 'python open-nmt/build_vocab.py'
 DO_VOCAB = args.vocab
 DO_SLURM = args.slurm
-BASE_SLURM_PATH = os.path.join('.', 'data', 'original', 'base_slurm.sh')
 FOLDS = [1, 2, 5, 10, 20]
 
 
@@ -22,6 +23,9 @@ def main():
         write_vocabs_and_slurms_for_one_data_augmentation_level(fold)
     if DO_VOCAB: print('Vocab files generated!')
     if DO_SLURM: print('Slurm bash scripts generated!')
+    if not DO_VOCAB and not DO_SLURM:
+        raise ValueError('Use this script with one or both of the following '\
+            'arguments:\n-v to build vocabularies\n-s to write slurm scripts')
 
 
 def write_vocabs_and_slurms_for_one_data_augmentation_level(fold):

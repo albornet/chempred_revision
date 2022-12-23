@@ -1,8 +1,10 @@
 import os
 
 
-CONFIGS_DIR = os.path.join('.', 'configs')
-LOGS_DIR = os.path.join('.', 'logs')
+CONFIGS_DIR = os.path.abspath('configs')
+LOGS_DIR = os.path.abspath('logs')
+DATA_DIR = os.path.abspath('data')
+BASE_CONFIG_PATH = os.path.join(DATA_DIR, 'original', 'base_train.yml')
 N_BASE_STEPS = 500000
 EMBED_TYPES = ['from-scratch', 'pre-trained']
 W2V_TEXT = """
@@ -16,7 +18,7 @@ freeze_word_vecs_dec: True
 
 
 def main():
-    for folder, subfolders, _ in os.walk('data'):
+    for folder, subfolders, _ in os.walk(DATA_DIR):
         if len(subfolders) == 0:
             if 'x1' in folder and 'x10' not in folder\
             and '-single' not in folder and '-noreag' not in folder:
@@ -27,32 +29,26 @@ def main():
 
 
 def setup_train_configs(data_folder, embed_types_for_this_data):
-    spec_path = os.path.join(*data_folder.split(os.path.sep)[1:])
+    spec_path = data_folder.split(DATA_DIR)[1][1:]
     for embed_type in embed_types_for_this_data:
         config_folder = os.path.join(CONFIGS_DIR, spec_path, embed_type)
         logs_folder = os.path.join(LOGS_DIR, spec_path, embed_type)
         os.makedirs(config_folder, exist_ok=True)
         os.makedirs(logs_folder, exist_ok=True)
-        write_train_config_file(config_folder)
+        write_train_config_file(config_folder, data_folder, logs_folder)
 
 
-def write_train_config_file(config_folder):
-    base_config_path = os.path.join('data', 'original', 'base_train.yml')
-    to_write = open(base_config_path, 'r').read()
-    if 'pre-trained' in config_folder :
-        to_write += W2V_TEXT
-    to_write = apply_parameters_to_config_file(to_write, config_folder)
+def write_train_config_file(config_folder, data_folder, logs_folder):
+    to_write = open(BASE_CONFIG_PATH, 'r').read()
+    if 'pre-trained' in config_folder: to_write += W2V_TEXT
+    fold_flag = os.path.basename(data_folder).split('x')[-1]
+    n_steps = str(int(fold_flag) * N_BASE_STEPS)
     config_path = os.path.join(config_folder, 'train.yml')
-    with open(config_path, 'w') as f: f.writelines(to_write)
-
-
-def apply_parameters_to_config_file(to_write, config_folder):
-    spec_folder, embed_type = os.path.split(config_folder)
-    spec_folder = spec_folder.replace(CONFIGS_DIR, '')[1:]  # no '/' at base
-    n_steps = str(int(spec_folder.split('x')[-1]) * N_BASE_STEPS)
-    return to_write.replace('$SPEC_FOLDER', spec_folder)\
-                   .replace('$EMBED_TYPE', embed_type)\
-                   .replace('$N_STEPS', n_steps)
+    with open(config_path, 'w') as f:
+        f.writelines(to_write.replace('$LOGS_FOLDER', logs_folder)\
+                             .replace('$DATA_FOLDER', data_folder)\
+                             .replace('$N_STEPS', n_steps)\
+                             .replace('$SEP', os.path.sep))
 
 
 if __name__ == '__main__':

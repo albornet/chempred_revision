@@ -1,27 +1,27 @@
 # Base path for saving miscellaneous data (not sure what gets saved here...)
-save_data: ./logs/$SPEC_FOLDER/$EMBED_TYPE/save_data
+save_data: $LOGS_FOLDER$SEPsave_data
 
 # Save vocabulary
-src_vocab: ./data/$SPEC_FOLDER/src_vocab.vocab
+src_vocab: $DATA_FOLDER$SEPsrc_vocab.vocab
 share_vocab: True
 
 # Prevent overwriting of existing files (or not)
 overwrite: True
 
 # Log file
-log_file: ./logs/$SPEC_FOLDER/$EMBED_TYPE/train_logs.log
+log_file: $LOGS_FOLDER$SEPtrain_logs.log
 
 # Corpus opts
 data:
   corpus_1:
-    path_src: ./data/$SPEC_FOLDER/src-train.txt
-    path_tgt: ./data/$SPEC_FOLDER/tgt-train.txt
+    path_src: $DATA_FOLDER$SEPsrc-train.txt
+    path_tgt: $DATA_FOLDER$SEPtgt-train.txt
   valid:
-    path_src: ./data/$SPEC_FOLDER/src-val.txt
-    path_tgt: ./data/$SPEC_FOLDER/tgt-val.txt
+    path_src: $DATA_FOLDER$SEPsrc-val.txt
+    path_tgt: $DATA_FOLDER$SEPtgt-val.txt
 
 # Place to save the checkpoints
-save_model: ./logs/$SPEC_FOLDER/$EMBED_TYPE/ckpts/model
+save_model: $LOGS_FOLDER$SEPckpts$SEPmodel
 save_checkpoint_steps: 10000
 keep_checkpoint: 5
 seed: 1234

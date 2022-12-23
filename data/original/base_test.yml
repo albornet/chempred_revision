@@ -2,7 +2,7 @@
 model: $LAST_CKPT_PATH
 
 # Test data to use
-src: $DATA_FOLDER/src-test.txt
+src: $DATA_FOLDER$SEPsrc-test.txt
 
 # Batch options 
 batch_size: 4096
@@ -13,12 +13,12 @@ beam_size: 10
 seed: 1234
 
 # Logging
-log_file: $LOGS_FOLDER/test_logs.log
+log_file: $LOGS_FOLDER$SEPtest_logs.log
 verbose: False
 n_best: 10
 
 # Where results are saved
-output: $LOGS_FOLDER/test_predictions.txt
+output: $LOGS_FOLDER$SEPtest_predictions.txt
 
 # Which GPU to use
 gpu: 3
