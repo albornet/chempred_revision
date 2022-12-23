@@ -1,13 +1,13 @@
 import os
 import re
 import random
-import selfies as sf
+# import selfies as sf
 import warnings
 warnings.filterwarnings('ignore', category=UserWarning)
 from tqdm import tqdm
-from rdkit import Chem
-from rdkit import RDLogger
-RDLogger.DisableLog('rdApp.*')
+# from rdkit import Chem
+# from rdkit import RDLogger
+# RDLogger.DisableLog('rdApp.*')
 from SmilesPE.tokenizer import SPE_Tokenizer
 from gensim.models import Word2Vec
 
@@ -22,17 +22,18 @@ TASKS = [
 ]
 FOLDS = [1, 2, 5, 10, 20]
 SPLITS = ['test', 'val', 'train']
-ORIGINAL_DIR = os.path.join('data', 'original')
+DATA_DIR = os.path.abspath('data')
+ORIGINAL_DIR = os.path.join(DATA_DIR, 'original')
 SPE_ENCODER_PATH_SMILES = os.path.join(ORIGINAL_DIR, 'spe_codes_smiles.txt')
 SPE_ENCODER_PATH_SELFIES = os.path.join(ORIGINAL_DIR, 'spe_codes_selfies.txt')
 
 
 def main():
-    random.seed(1234)  # this is enough for replicable augmentation
-    create_smiles_datasets()  # original data -> all tasks & data augmentations
-    create_selfies_datasets()  # smiles data -> selfies data
+    # random.seed(1234)  # this is enough for replicable augmentation
+    # create_smiles_datasets()  # original data -> all tasks & data augmentations
+    # create_selfies_datasets()  # smiles data -> selfies data
     create_spe_datasets()  # smiles and selfies atom data -> spe data
-    create_w2v_embeddings()  # smiles, selfies, atom, bpe -> added w2v vectors
+    # create_w2v_embeddings()  # smiles, selfies, atom, bpe -> added w2v vectors
 
 
 def create_smiles_datasets():
@@ -46,32 +47,40 @@ def create_smiles_datasets():
 
 def create_selfies_datasets():
     print('\nStarted generating selfies datasets from smiles datasets')
-    for folder, _, files in os.walk('data'):
-        if 'smiles' in folder and 'x1' in folder and 'x10' not in folder\
-        and '-single' not in folder and '-noreag' not in folder:
-            for smiles_file in [f for f in files if '.txt' in f]:
-                smiles_full_path = os.path.join(folder, smiles_file)
-                write_selfies_file_from_smiles_file(smiles_full_path)
+    for folder, _, files in filter_data_folders(additional_filter='smiles'):
+        for smiles_file in filter_data_files(files):
+            smiles_full_path = os.path.join(folder, smiles_file)
+            write_selfies_file_from_smiles_file(smiles_full_path)
 
 
 def create_spe_datasets():
     print('\nStarted generating spe datasets from atom-tokenized datasets')
-    for folder, _, files in os.walk('data'):
-        if 'atom' in folder and 'x1' in folder and 'x10' not in folder\
-        and '-single' not in folder and '-noreag' not in folder:
-            for atom_file in [f for f in files if '.txt' in f]:
-                atom_full_path = os.path.join(folder, atom_file)
-                write_spe_file_from_atom_file(atom_full_path)
+    for folder, _, files in filter_data_folders(additional_filter='atom'):
+        for atom_file in filter_data_files(files):
+            atom_full_path = os.path.join(folder, atom_file)
+            write_spe_file_from_atom_file(atom_full_path)
 
 
 def create_w2v_embeddings():
     print('\nStarted generating w2v embeddings for all input combinations')
-    for folder, _, _ in os.walk('data'):
-        if 'x1' in folder and 'x10' not in folder\
-        and '-single' not in folder and '-noreag' not in folder:
-            mol_data = load_rxn_molecules_for_w2v(folder)
-            w2v_vectors = train_w2v_vectors(mol_data)
-            write_embedding_vectors(folder, w2v_vectors)
+    for folder, _, _ in filter_data_folders():
+        mol_data = load_rxn_molecules_for_w2v(folder)
+        w2v_vectors = train_w2v_vectors(mol_data)
+        write_embedding_vectors(folder, w2v_vectors)
+
+
+def filter_data_folders(additional_filter=''):
+   return [(folder, files) for folder, _, files in os.walk(DATA_DIR)
+            if 'x1' in folder and 'x10' not in folder
+            and '-single' not in folder and '-noreag' not in folder
+            and additional_filter in folder]
+
+
+def filter_data_files(files):
+    return [f for f in files
+            if any([s in f for s in ['src', 'tgt']])
+            and any([s in f for s in ['train', 'test', 'val']])
+            and '.txt' in f]
 
 
 def write_selfies_file_from_smiles_file(smiles_path):
