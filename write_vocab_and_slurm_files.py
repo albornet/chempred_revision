@@ -1,4 +1,5 @@
 import os
+import math
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('-v', '--vocab', action='store_true')
@@ -44,9 +45,11 @@ def write_slurm_script(config_path, fold):
                                                      .split(os.path.sep)[:-1])
     slurm_log_path = os.path.join(logs_subdir, 'slurm.log')
     slurm_err_path = os.path.join(logs_subdir, 'slurm.err')
+    slurm_runtime = compute_runtime(fold)
     slurm_script = slurm_script.replace('$CONFIG_PATH', config_path)\
                                .replace('$SLURM_LOG_PATH', slurm_log_path)\
-                               .replace('$SLURM_ERR_PATH', slurm_err_path)
+                               .replace('$SLURM_ERR_PATH', slurm_err_path)\
+                               .replace('$SLURM_RUNTIME', slurm_runtime)
     fold_subdir = 'x%s' % fold
     slurm_subdir = os.path.join(SLURM_DIR, fold_subdir)
     slurm_path = '-'.join(config_path.split(CONFIGS_DIR)[1]
@@ -59,6 +62,15 @@ def write_slurm_script(config_path, fold):
     os.makedirs(slurm_subdir, exist_ok=True)
     slurm_path = os.path.join(slurm_subdir, slurm_path.replace('.yml', '.sh'))
     with open(slurm_path, 'w') as f: f.writelines(slurm_script)
+
+
+def compute_runtime(fold):
+    n_hours_base = 12  # approximate runtime for 1 fold data augmentation
+    n_hours_max = 7 * 24  # 7 days = max runtime on baobab
+    n_hours = n_hours_base +\
+              (n_hours_max - n_hours_base) *\
+              math.log(((math.e - 1) * fold + (20 - math.e)) / 19)
+    return '%s-%s:00:00' % divmod(int(n_hours), 24)
 
 
 if __name__ == '__main__':
