@@ -125,6 +125,8 @@ def generate_augmented_dataset(task, fold):
     os.makedirs(out_fulldir, exist_ok=True)
     for split in SPLITS:
         write_smiles_files(out_fulldir, task, fold, split)
+        if split == 'test' and '-noreag' in task:  # need this test-case too
+            write_smiles_files(out_fulldir, task, fold, '%s-50k' % split)
 
 
 def write_smiles_files(out_dir, task, fold, split):
@@ -134,7 +136,7 @@ def write_smiles_files(out_dir, task, fold, split):
          open(os.path.join(out_dir, 'src-%s.txt' % split), 'w') as src_out,\
          open(os.path.join(out_dir, 'tgt-%s.txt' % split), 'w') as tgt_out:
 
-        progress_bar = tqdm(zip(src_in.readlines(), tgt_in.readlines()))
+        progress_bar = tqdm(list(zip(src_in.readlines(), tgt_in.readlines())))
         for src, tgt in progress_bar:
             progress_bar.set_description('------ Split %s' % split)
             species = parse_rxn(src, tgt)
@@ -189,7 +191,7 @@ def augment_sample(src, tgt, fold):
     src_augm = [list(s) for s in list(zip(*src_augm))]  # re-group molecules
     [random.shuffle(s) for s in src_augm]  # shuffle molecule order
     src_augm = [' . '.join(s) for s in src_augm]  # put back in token string
-    tgt_augm = [' . '.join(sorted(tgt.split(' . ')))] * fold  # de-augmentation
+    tgt_augm = [tgt] * fold  # [' . '.join(sorted(tgt.split(' . ')))] * fold
     return '\n'.join(src_augm), '\n'.join(tgt_augm)
 
 
@@ -258,24 +260,23 @@ def create_seflies_from_canonic_smiles(smiles_molecule):
         return sf.encoder(smiles_molecule)
     except sf.EncoderError:
         return '?'  # to preserve # molecules / rxn
-    # Molecules that didn't work in the USPTO-MIT dataset:
-    # O=I(=O)Cl
-    # Cl[IH2](Cl)Cl
-    # O=[IH2]c1ccccc1
-    # F[P-](F)(F)(F)(F)F
-    # O=C(O)c1ccccc1I(=O)=O
-    # O=C1OI(=O)(O)c2ccccc21
-    # S=[Re](=S)(=S)(=S)(=S)(=S)=S
-    # CC1(C)O[IH2](C(F)(F)F)c2ccccc21
-    # C12C3C4C5C1[Fe]23451678C2C1C6C7C28
-    # C12C3C4C5C1[Zr]23451678C2C1C6C7C28
-    # O=C(OI(OC(=O)C(F)(F)F)c1ccccc1)C(F)(F)F
-    # CC(=O)OI1(OC(C)=O)(OC(C)=O)OC(=O)c2ccccc21
-    # Cc1ccc(S(=O)(=O)N=C2CCCC[IH2]2c2ccccc2)cc1
-    # O=C(O[IH2](OC(=O)C(F)(F)F)c1ccccc1)C(F)(F)F
-    # COc1cc2c(cc1OC)C([PH2](c1ccccc1)(c1ccccc1)c1ccccc1)OC2=O
-    # O=c1[nH]c2c3occc3c(F)c(F)c2n1-c1ccc([IH]S(=O)(=O)C2CC2COCc2ccccc2)cc1F
-    # print('This molecule didn''t work %s' % smiles_molecule)
+        # Molecules that didn't work in the USPTO-MIT dataset:
+        # O=I(=O)Cl
+        # Cl[IH2](Cl)Cl
+        # O=[IH2]c1ccccc1
+        # F[P-](F)(F)(F)(F)F
+        # O=C(O)c1ccccc1I(=O)=O
+        # O=C1OI(=O)(O)c2ccccc21
+        # S=[Re](=S)(=S)(=S)(=S)(=S)=S
+        # CC1(C)O[IH2](C(F)(F)F)c2ccccc21
+        # C12C3C4C5C1[Fe]23451678C2C1C6C7C28
+        # C12C3C4C5C1[Zr]23451678C2C1C6C7C28
+        # O=C(OI(OC(=O)C(F)(F)F)c1ccccc1)C(F)(F)F
+        # CC(=O)OI1(OC(C)=O)(OC(C)=O)OC(=O)c2ccccc21
+        # Cc1ccc(S(=O)(=O)N=C2CCCC[IH2]2c2ccccc2)cc1
+        # O=C(O[IH2](OC(=O)C(F)(F)F)c1ccccc1)C(F)(F)F
+        # COc1cc2c(cc1OC)C([PH2](c1ccccc1)(c1ccccc1)c1ccccc1)OC2=O
+        # O=c1[nH]c2c3occc3c(F)c(F)c2n1-c1ccc([IH]S(=O)(=O)C2CC2COCc2ccccc2)cc1F
 
 
 def load_rxn_molecules_for_w2v(data_dir_in):
