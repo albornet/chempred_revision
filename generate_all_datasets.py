@@ -47,7 +47,7 @@ def create_smiles_datasets():
 
 def create_selfies_datasets():
     print('\nStarted generating selfies datasets from smiles datasets')
-    for folder, _, files in filter_data_folders(additional_filter='smiles'):
+    for folder, files in filter_data_folders(additional_filter='smiles'):
         for smiles_file in filter_data_files(files):
             smiles_full_path = os.path.join(folder, smiles_file)
             write_selfies_file_from_smiles_file(smiles_full_path)
@@ -55,7 +55,7 @@ def create_selfies_datasets():
 
 def create_spe_datasets():
     print('\nStarted generating spe datasets from atom-tokenized datasets')
-    for folder, _, files in filter_data_folders(additional_filter='atom'):
+    for folder, files in filter_data_folders(additional_filter='atom'):
         for atom_file in filter_data_files(files):
             atom_full_path = os.path.join(folder, atom_file)
             write_spe_file_from_atom_file(atom_full_path)
@@ -63,7 +63,7 @@ def create_spe_datasets():
 
 def create_w2v_embeddings():
     print('\nStarted generating w2v embeddings for all input combinations')
-    for folder, _, _ in filter_data_folders():
+    for folder, _ in filter_data_folders():
         mol_data = load_rxn_molecules_for_w2v(folder)
         w2v_vectors = train_w2v_vectors(mol_data)
         write_embedding_vectors(folder, w2v_vectors)
