@@ -18,17 +18,17 @@ $ python generate_all_datasets.py
 
 * Train all models (long step! here are two different ways)
 ```
-$ FOR BOTH WAYS
+# FOR BOTH WAYS
 $ python write_train_configs.py  # write configuration files for training
-$
-$ # THEN, EITHER RUN IT ON YOUR OWN COMPUTER / SERVER (WITH AT LEAST 1 GPU)
+
+# THEN, EITHER RUN IT ON YOUR OWN COMPUTER / SERVER (WITH AT LEAST 1 GPU)
 $ python write_vocab_and_slurm_files.py -v  # vocabulary generation only
 $ python train_all_models.py  # all training scripts run one by one
-$
-$ # OR RUN IT ON AN HPC CLUSTER
-$ # -> You should adapt ./data/original/base_slurm.sh to your needs
-$ # -> You should install a conda environment named "chempred_revision" on your personal HPC space,
-$ #    where open-nmt is installed with "pip install -e ." from ./open-nmt)
+
+# OR RUN IT ON AN HPC CLUSTER
+# -> You should adapt ./data/original/base_slurm.sh to your needs
+# -> You should install a conda environment named "chempred_revision" on your personal HPC space,
+#    where open-nmt is installed with "pip install -e ." from ./open-nmt)
 $ python write_vocab_and_slurm_files.py -v -s  # vocabulary and slurm script generation
 $ ./sbatch_all_models.sh  # you may need to also update write_vocab_and_slurm_files.py to your needs!
 ```
