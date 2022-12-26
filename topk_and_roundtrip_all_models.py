@@ -11,8 +11,8 @@ TOPKS = [1, 3, 5, 10]
 MODES = ['test', 'test-50k', 'roundtrip', 'roundtrip-50k']
 HEADERS = ['task', 'format', 'token', 'embed', 'augment'] +\
           ['top-%s' % k for k in TOPKS]
-LOGS_DIR = os.path.join('.', 'logs')
-DATA_DIR = os.path.join('.', 'data')
+LOGS_DIR = os.path.abspath('logs')
+DATA_DIR = os.path.abspath('data')
 
 
 def main():
