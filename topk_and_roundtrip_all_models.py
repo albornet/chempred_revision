@@ -8,6 +8,7 @@ RDLogger.DisableLog('rdApp.*')
 
 
 TOPKS = [1, 3, 5, 10]
+MODES = ['test', 'test-50k', 'roundtrip', 'roundtrip-50k']
 HEADERS = ['task', 'format', 'token', 'embed', 'augment'] +\
           ['top-%s' % k for k in TOPKS]
 LOGS_DIR = os.path.join('.', 'logs')
@@ -15,8 +16,8 @@ DATA_DIR = os.path.join('.', 'data')
 
 
 def main():
-    evaluate_models('test')
-    evaluate_models('roundtrip')
+    for mode in MODES:
+        evaluate_models(mode)
 
 
 def evaluate_models(mode):
@@ -26,7 +27,7 @@ def evaluate_models(mode):
             print('Starting %s' % folder)
             pred_path = os.path.join(folder, '%s_predictions.txt' % mode)
             gold_dir = os.path.split(folder)[0].replace(LOGS_DIR, DATA_DIR)
-            gold_flag = 'src' if mode == 'roundtrip' else 'tgt'
+            gold_flag = 'src' if 'roundtrip' in mode else 'tgt'
             gold_path = os.path.join(gold_dir, '%s-test.txt' % gold_flag)
             compute_model_topk_accuracy(pred_path, gold_path, mode)
 
@@ -35,7 +36,7 @@ def compute_model_topk_accuracy(pred_path, gold_path, mode):
     # Retrieve model data and initialize parameters
     all_preds, all_golds = read_pred_and_data(pred_path, gold_path)
     n_preds_per_gold = len(all_preds) // len(all_golds)
-    topks = [1] if mode == 'rountrip' else TOPKS
+    topks = [1] if 'roundtrip' in mode else TOPKS
     topk_hits = {k: [] for k in topks}
     
     # Compute all top-k accuracies for this model
@@ -89,8 +90,7 @@ def canonicalize_smiles(smiles):
 
 
 def write_result_line(content, mode, write_or_append):
-    result_flag = 'roundtrip' if mode == 'roundtrip' else 'topk'
-    with open('results_%s.csv' % result_flag, write_or_append) as f:
+    with open('results_%s.csv' % mode, write_or_append) as f:
         writer = csv.writer(f); writer.writerow(content)
 
 
