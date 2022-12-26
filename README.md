@@ -30,7 +30,7 @@ $ # -> You should adapt ./data/original/base_slurm.sh to your needs
 $ # -> You should install a conda environment named "chempred_revision" on your personal HPC space,
 $ #    where open-nmt is installed with "pip install -e ." from ./open-nmt)
 $ python write_vocab_and_slurm_files.py -v -s  # vocabulary and slurm script generation
-$ sbatch slurm/<path_to_slurm_file>  # do this for all slurm files located in ./slurm (grouped by runtime)
+$ ./sbatch_all_models.sh  # you may need to also update write_vocab_and_slurm_files.py to your needs!
 ```
 
 * Generate predictions using the test data, with all trained model, and write them to text files
@@ -41,6 +41,6 @@ $ python test_and_roundtrip_all_models.py  # generate predictions for all models
 
 * Evaluate the performance of all models (top-k and roundtrip) and generate all figures
 ```
-$ compute_topk_and_roundtrip_accuracy.py
+$ topk_and_roundtrip_all_models.py
 $ create_figures_x_and_y.py  # coming soon
 ```
