@@ -41,6 +41,6 @@ $ python test_and_roundtrip_all_models.py  # generate predictions for all models
 
 * Evaluate the performance of all models (top-k and roundtrip) and generate all figures
 ```
-$ topk_and_roundtrip_all_models.py
-$ create_figures_x_and_y.py  # coming soon
+$ python topk_and_roundtrip_all_models.py
+$ python create_figures_x_and_y.py  # coming soon
 ```
