@@ -9,12 +9,12 @@ N_BASE_STEPS = 500000
 EMBED_TYPES = ['from-scratch', 'pre-trained']
 W2V_TEXT = """
 # Add pre-trained embeddings
-both_embeddings: ./data/$SPEC_FOLDER/w2v-embeddings.txt
+both_embeddings: $DATA_FOLDER%sw2v-embeddings.txt
 embeddings_type: word2vec
 word_vec_size: 256
 freeze_word_vecs_enc: True
 freeze_word_vecs_dec: True
-"""
+""" % os.path.sep
 
 
 def main():
