@@ -20,6 +20,7 @@ TASKS = [
     'reactant-pred-single',
     'reagent-pred'
 ]
+USPTO_50K_TASKS = [t for t in TASKS if t != 'reagent-pred']
 FOLDS = [1, 2, 5, 10, 20]
 SPLITS = ['test', 'val', 'train']
 DATA_DIR = os.path.abspath('data')
@@ -125,7 +126,7 @@ def generate_augmented_dataset(task, fold):
     os.makedirs(out_fulldir, exist_ok=True)
     for split in SPLITS:
         write_smiles_files(out_fulldir, task, fold, split)
-        if split == 'test' and '-noreag' in task:  # need this test-case too
+        if split == 'test' and task in USPTO_50K_TASKS:
             write_smiles_files(out_fulldir, task, fold, '%s-50k' % split)
 
 
