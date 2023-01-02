@@ -3,14 +3,13 @@ import os
 
 TEST_SCRIPT = 'python open-nmt/translate.py'
 CONFIGS_DIR = os.path.join('.', 'configs')
+MODES = ['test', 'test-50k', 'roundtrip', 'roundtrip-50k']
 FOLDS = [1, 2, 5, 10, 20]
 
 
 def main():
-    # First generate predictions with all possible models
-    generate_predictions_with_all_models(mode='test')
-    # Then only uses these predictions for the round-trip experiment
-    generate_predictions_with_all_models(mode='roundtrip')
+    for mode in MODES:
+        generate_predictions_with_all_models(mode=mode)
 
 
 def generate_predictions_with_all_models(mode):
