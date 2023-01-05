@@ -5,7 +5,8 @@ CONFIGS_DIR = os.path.abspath('configs')
 LOGS_DIR = os.path.abspath('logs')
 DATA_DIR = os.path.abspath('data')
 BASE_CONFIG_PATH = os.path.join(DATA_DIR, 'original', 'base_train.yml')
-N_BASE_STEPS = 500000
+N_BASE_TRAIN_STEPS = 500000
+N_BASE_VALID_STEPS = 10000
 EMBED_TYPES = ['from-scratch', 'pre-trained']
 W2V_TEXT = """
 # Add pre-trained embeddings
@@ -42,12 +43,14 @@ def write_train_config_file(config_folder, data_folder, logs_folder):
     to_write = open(BASE_CONFIG_PATH, 'r').read()
     if 'pre-trained' in config_folder: to_write += W2V_TEXT
     fold_flag = os.path.basename(data_folder).split('x')[-1]
-    n_steps = str(int(fold_flag) * N_BASE_STEPS)
+    n_steps_train_max = str(int(fold_flag) * N_BASE_TRAIN_STEPS)
+    n_steps_for_valid = str(int(fold_flag) * N_BASE_VALID_STEPS)
     config_path = os.path.join(config_folder, 'train.yml')
     with open(config_path, 'w') as f:
         f.writelines(to_write.replace('$LOGS_FOLDER', logs_folder)\
                              .replace('$DATA_FOLDER', data_folder)\
-                             .replace('$N_STEPS', n_steps)\
+                             .replace('$N_STEPS_TRAIN_MAX', n_steps_train_max)\
+                             .replace('$N_STEPS_FOR_VALID', n_steps_for_valid)
                              .replace('$SEP', os.path.sep))
 
 

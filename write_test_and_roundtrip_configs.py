@@ -40,12 +40,14 @@ def write_config_file(ckpt_folder, logs_folder, mode):
         if not check_if_50k_should_be_run(ckpt_folder): return
     config_path, last_ckpt_path, data_path, logs_path, output_path =\
         identify_paths(ckpt_folder, logs_folder, mode)
+    n_best = '1' if 'roundtrip' in mode else '10'
     to_write = open(BASE_CONFIG_PATH, 'r').read()
     with open(config_path, 'w') as f:
         f.writelines(to_write.replace('$LAST_CKPT_PATH', last_ckpt_path)\
                              .replace('$DATA_PATH', data_path)\
                              .replace('$LOGS_PATH', logs_path)\
-                             .replace('$OUTPUT_PATH', output_path))
+                             .replace('$OUTPUT_PATH', output_path)\
+                             .replace('$N_BEST', n_best))
 
 
 def check_if_roundtrip_should_be_run(folder):
@@ -70,10 +72,10 @@ def identify_paths(ckpt_folder, logs_folder, mode):
     config_path = os.path.join(config_folder, '%s.yml' % mode)
     logs_path = os.path.join(logs_folder, '%s.log' % mode)
     output_path = os.path.join(logs_folder, '%s_predictions.txt' % mode)
-    last_ckpt_path = os.path.join(ckpt_folder, os.listdir(ckpt_folder)[-1])
     if 'roundtrip' in mode:  # exchange input data and prediction model
-        data_path = output_path  # path of reactant predictions on test data
-        last_ckpt_path = last_ckpt_path.replace('reactant-pred', 'product-pred')
+        data_path = output_path.replace('roundtrip', 'test')
+        ckpt_folder = ckpt_folder.replace('reactant-pred', 'product-pred')
+    last_ckpt_path = os.path.join(ckpt_folder, os.listdir(ckpt_folder)[-1])
     return config_path, last_ckpt_path, data_path, logs_path, output_path
 
 

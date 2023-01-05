@@ -15,7 +15,7 @@ seed: 1234
 # Logging
 log_file: $LOGS_PATH
 verbose: False
-n_best: 10
+n_best: $N_BEST
 
 # Where results are saved
 output: $OUTPUT_PATH

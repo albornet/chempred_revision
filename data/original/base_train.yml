@@ -22,13 +22,13 @@ data:
 
 # Place to save the checkpoints
 save_model: $LOGS_FOLDER$SEPckpts$SEPmodel
-save_checkpoint_steps: 10000
+save_checkpoint_steps: $N_STEPS_FOR_VALID
 keep_checkpoint: 10
 seed: 1234
 
 # Training steps
 train_steps: $N_STEPS
-valid_steps: 10000
+valid_steps: $N_STEPS_FOR_VALID
 warmup_steps: 8000
 report_every: 100
 
