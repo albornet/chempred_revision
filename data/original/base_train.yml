@@ -27,7 +27,7 @@ keep_checkpoint: 10
 seed: 1234
 
 # Training steps
-train_steps: $N_STEPS
+train_steps: $N_STEPS_TRAIN_MAX
 valid_steps: $N_STEPS_FOR_VALID
 warmup_steps: 8000
 report_every: 100
