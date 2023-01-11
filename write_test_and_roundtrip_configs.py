@@ -1,4 +1,5 @@
 import os
+import shutil
 
 
 DATA_DIR = os.path.abspath('data')
@@ -73,17 +74,24 @@ def identify_paths(ckpt_folder, logs_folder, mode):
     logs_path = os.path.join(logs_folder, '%s.log' % mode)
     output_path = os.path.join(logs_folder, '%s_predictions.txt' % mode)
     if 'roundtrip' in mode:  # exchange input data and prediction model
-        data_path = output_path.replace('roundtrip', 'test')
-        ckpt_folder = ckpt_folder.replace('reactant-pred', 'product-pred')
+        data_path, ckpt_folder = setup_roundtrip(output_path, ckpt_folder)
     last_ckpt_path = os.path.join(ckpt_folder, os.listdir(ckpt_folder)[-1])
     return config_path, last_ckpt_path, data_path, logs_path, output_path
+
+
+def setup_roundtrip(output_path, ckpt_folder):
+    data_path = output_path.replace('roundtrip', 'test')
+    ckpt_folder = ckpt_folder.replace('reactant-pred-noreag',
+                                      'product-pred-noreag')\
+                             .replace('reactant-pred', 'product-pred-noreag')
+    return data_path, ckpt_folder
 
 
 def reset_test_and_roundtrip_configs(mode):
     for folder, _, files in os.walk(CONFIGS_DIR):
         if '%s.yml' % mode in files:
             to_remove = os.path.join(folder, '%s.yml' % mode)
-            os.system('rm %s' % to_remove)
+            os.remove(to_remove)
 
 
 if __name__ == '__main__':
