@@ -1,5 +1,5 @@
 # Model checkpoint
-model: $LAST_CKPT_PATH
+model: $CKPT_PATH
 
 # Test data to use
 src: $DATA_PATH
@@ -21,4 +21,4 @@ n_best: $N_BEST
 output: $OUTPUT_PATH
 
 # Which GPU to use
-gpu: 0
+gpu: 2

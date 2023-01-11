@@ -3,8 +3,7 @@ import os
 
 TEST_SCRIPT = 'python open-nmt/translate.py'
 CONFIGS_DIR = os.path.join('.', 'configs')
-# MODES = ['test', 'test-50k', 'roundtrip', 'roundtrip-50k']
-MODES = ['roundtrip', 'roundtrip-50k']
+MODES = ['test', 'test-50k', 'roundtrip', 'roundtrip-50k']
 FOLDS = [1, 2, 5, 10, 20]
 
 
