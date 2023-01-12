@@ -98,7 +98,8 @@ def write_test_slurm_file(train_path):
     train_dir, train_file = os.path.split(train_path)
     for mode in TEST_MODES:
         if 'roundtrip' in mode\
-        and not any([s in train_file for s in ROUNDTRIP_TASKS]):
+        and (not any([s in train_file for s in ROUNDTRIP_TASKS])\
+             or '-single' in train_file):
             continue
         
         if 'roundtrip' in mode\
@@ -113,11 +114,13 @@ def write_test_slurm_file(train_path):
         time_line = '#SBATCH --time=0-0:30:00\n'
         lines = [time_line if '--time' in l else l for l in lines]
         to_write = ''.join(lines).replace('train.py', 'translate.py')\
-                                 .replace('train.yml', '%s.yml' % mode)
+                                 .replace('train.yml', '%s.yml' % mode)\
+                                 .replace('slurm.log', 'slurm-%s.log' % mode)\
+                                 .replace('slurm.err', 'slurm-%s.err' % mode)
 
         
         test_dir = train_dir.replace('train%s' % os.path.sep,
-                                     'test%s' % os.path.sep)
+                                     '%s%s' % (mode.strip('-50k'), os.path.sep))
         test_file = train_file.replace('train.sh', '%s.sh' % mode)
         test_path = os.path.join(test_dir, test_file)
         os.makedirs(test_dir, exist_ok=True)

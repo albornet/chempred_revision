@@ -21,4 +21,4 @@ n_best: $N_BEST
 output: $OUTPUT_PATH
 
 # Which GPU to use
-gpu: 2
+gpu: 0
