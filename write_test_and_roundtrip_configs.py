@@ -1,5 +1,4 @@
 import os
-import shutil
 
 
 DATA_DIR = os.path.abspath('data')
@@ -7,7 +6,7 @@ LOGS_DIR = os.path.abspath('logs')
 CONFIGS_DIR = os.path.abspath('configs')
 BASE_CONFIG_PATH = os.path.abspath(
     os.path.join('data', 'original', 'base_test.yml'))
-CKPT_SELECTION_MODE = 'best'  # 'first', 'last', 'best'
+CKPT_SELECTION_MODE = 'last'  # 'first', 'last', 'best'
 MODES = ['test', 'test-50k', 'roundtrip', 'roundtrip-50k']
 ROUNDTRIP_SPECS = ['atom', 'smiles', 'from-scratch']
 ROUNDTRIP_TASKS = ['reactant-pred', 'reactant-pred-noreag']
