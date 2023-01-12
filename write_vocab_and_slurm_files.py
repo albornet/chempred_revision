@@ -111,7 +111,8 @@ def write_test_slurm_file(train_path):
             continue
         
         with open(train_path, 'r') as f: lines = f.readlines()
-        time_line = '#SBATCH --time=0-0:30:00\n'
+        time_hours = '1:30' if 'roundtrip' in mode else '0:30'
+        time_line = '#SBATCH --time=0-%s:00\n' % time_hours
         lines = [time_line if '--time' in l else l for l in lines]
         to_write = ''.join(lines).replace('train.py', 'translate.py')\
                                  .replace('train.yml', '%s.yml' % mode)\
