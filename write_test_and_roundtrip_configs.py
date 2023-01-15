@@ -74,7 +74,12 @@ def identify_paths(ckpt_folder, logs_folder, mode):
     logs_path = os.path.join(logs_folder, '%s.log' % mode)
     output_path = os.path.join(logs_folder, '%s_predictions.txt' % mode)
     if 'roundtrip' in mode:  # exchange input data and prediction model
-        data_path, ckpt_folder = setup_roundtrip(output_path, ckpt_folder)
+        write_roundtrip_data(data_path, output_path)
+        ckpt_folder = ckpt_folder.replace('reactant-pred', 'product-pred')
+        # ckpt_folder = ckpt_folder.replace('reactant-pred-noreag',
+        #                                   'product-pred-noreag')\
+        #                          .replace('reactant-pred',
+        #                                   'product-pred-noreag')
     ckpt_path = select_ckpt_path(ckpt_folder)
     return config_path, ckpt_path, data_path, logs_path, output_path
 
@@ -97,12 +102,23 @@ def select_ckpt_path(ckpt_folder):
         raise ValueError('Invalid mode for checkpoint selection')
 
 
-def setup_roundtrip(output_path, ckpt_folder):
-    data_path = output_path.replace('roundtrip', 'test')
-    ckpt_folder = ckpt_folder.replace('reactant-pred-noreag',
-                                      'product-pred-noreag')\
-                             .replace('reactant-pred', 'product-pred-noreag')
-    return data_path, ckpt_folder
+def write_roundtrip_data(data_path, output_path):
+    reac_pred_path = output_path.replace('roundtrip', 'test')
+    with open(reac_pred_path, 'r') as f: reac_pred_lines = f.readlines()
+    if '-noreag' not in output_path and '-50k' not in output_path:
+        reac_reag_path = os.path.join(DATA_DIR, 'original', 'src-test.txt')
+        with open(reac_reag_path, 'r') as f_r,\
+             open(data_path, 'w') as f_w:
+            for i, reac_reag_line in enumerate(f_r.readlines()):
+                reag_line = reac_reag_line.split(' >')[1].strip()
+                reac_pred_matches = reac_pred_lines[i * 10:(i + 1) * 10]
+                if len(reag_line) > 0:
+                    reac_pred_matches = [' . '.join([p.strip(), reag_line])
+                                         + '\n' for p in reac_pred_matches]
+                f_w.writelines(reac_pred_matches)
+    else:
+        with open(data_path, 'w') as f_w:
+            f_w.writelines(reac_pred_lines)
 
 
 def reset_test_and_roundtrip_configs(mode):
