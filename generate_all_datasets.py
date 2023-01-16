@@ -174,7 +174,7 @@ def create_new_sample(task, reactants, reagents, products):
         new_tgt = ' . '.join(reactants)
     elif task == 'reactant-pred-single':
         single_react = random.sample(reactants, 1)  # list
-        other_reacts = [r for r in reactants if r != single_react]
+        other_reacts = [r for r in reactants if r != single_react[0]]
         new_src = ' . '.join(other_reacts + reagents + products)
         new_tgt = ' . '.join(single_react)
     elif task == 'reagent-pred':
