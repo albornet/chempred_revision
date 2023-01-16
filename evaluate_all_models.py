@@ -1,5 +1,5 @@
 import os
-import csv 
+import csv
 import selfies as sf
 from multiprocessing import Pool
 from tqdm import tqdm
@@ -8,21 +8,24 @@ from rdkit import RDLogger
 RDLogger.DisableLog('rdApp.*')
 
 
-KS = [1, 3, 5, 10]
-MODES = ['test', 'test-50k']  #, 'roundtrip', 'roundtrip-50k']
-SPECS = ['task', 'format', 'token', 'embed', 'augment']
-HEADERS = SPECS + ['top-%s' % k for k in KS] + ['lenient-%s' % k for k in KS]
 LOGS_DIR = os.path.abspath('logs')
 DATA_DIR = os.path.abspath('data')
+RESULTS_DIR = os.path.abspath('results')
+KS = [1, 3, 5, 10]
+# MODES = ['test', 'test-50k', 'roundtrip', 'roundtrip-50k']
+MODES = ['roundtrip-50k']
+SPECS = ['task', 'format', 'token', 'embed', 'augment']
+HEADERS = SPECS + ['top-%s' % k for k in KS] + ['lenient-%s' % k for k in KS]
 
 
 def main():
+    os.makedirs(RESULTS_DIR, exist_ok=True)
     for mode in MODES:
         evaluate_models(mode)
 
 
 def evaluate_models(mode):
-    result_file_path = 'results_%s.csv' % mode
+    result_file_path = os.path.join(RESULTS_DIR, 'results_%s.csv' % mode)
     write_result_line(result_file_path, HEADERS, 'w')  # initialize result file
     args_to_run = []
     for folder, _, files in os.walk(LOGS_DIR):
@@ -51,9 +54,9 @@ def compute_model_topk_accuracy(write_path, pred_path, gold_path, mode):
     # Retrieve model data and initialize parameters
     all_preds, all_golds = read_pred_and_data(pred_path, gold_path)
     n_preds_per_gold = len(all_preds) // len(all_golds)
-    ks = [1] if 'roundtrip' in mode else KS
-    topk_hits = {k: [] for k in ks}  # for strict accuracy
-    lenk_hits = {k: [] for k in ks}  # for lenient accuracy
+    # ks = [1] if 'roundtrip' in mode else KS
+    topk_hits = {k: [] for k in KS}  # for strict accuracy
+    lenk_hits = {k: [] for k in KS}  # for lenient accuracy
     
     # Compute all top-k accuracies for this model
     progress_bar = tqdm(list(enumerate(all_golds)))
@@ -62,9 +65,9 @@ def compute_model_topk_accuracy(write_path, pred_path, gold_path, mode):
         preds = all_preds[i * n_preds_per_gold:(i + 1) * n_preds_per_gold]
         preds, gold = standardize_molecules(preds, gold, pred_path)
         [topk_hits[k].append(
-            compute_topk_hit(preds[:k], gold, mode='all')) for k in ks]
+            compute_topk_hit(preds[:k], gold, mode='all')) for k in KS]
         [lenk_hits[k].append(
-            compute_topk_hit(preds[:k], gold, mode='any')) for k in ks]
+            compute_topk_hit(preds[:k], gold, mode='any')) for k in KS]
     
     # Write results for this model in a common file
     _, task, format, token, augment, embed, _ =\
@@ -96,7 +99,7 @@ def standardize_molecules(preds, gold, pred_path):
     return preds, gold
 
 
-def compute_topk_hit(preds, gold, mode='all'):
+def compute_topk_hit(preds, gold, mode='strict'):
     """ Compute whether a list of top-k best predictions contains a correct one
     Args:
         - preds: list of k best predictions, strings of '.'- separated molecules
@@ -109,6 +112,9 @@ def compute_topk_hit(preds, gold, mode='all'):
     elif mode == 'any':
         # Requirement: any of the gold molecules are in the model prediction
         hit_fn = lambda gold, pred: any([g in pred for g in gold])
+    elif mode == 'strict':
+         # Requirement: exact match between gold and prediction molecules
+         hit_fn = lambda gold, pred: sorted(pred) == sorted(gold)
     else:
         raise ValueError('Incorrect mode for compute hit function')
     # Requirement: at least one of preds (list of length k) deserves a hit
