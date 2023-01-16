@@ -12,8 +12,7 @@ LOGS_DIR = os.path.abspath('logs')
 DATA_DIR = os.path.abspath('data')
 RESULTS_DIR = os.path.abspath('results')
 KS = [1, 3, 5, 10]
-# MODES = ['test', 'test-50k', 'roundtrip', 'roundtrip-50k']
-MODES = ['roundtrip-50k']
+MODES = ['test', 'test-50k', 'roundtrip', 'roundtrip-50k']
 SPECS = ['task', 'format', 'token', 'embed', 'augment']
 HEADERS = SPECS + ['top-%s' % k for k in KS] + ['lenient-%s' % k for k in KS]
 
@@ -54,7 +53,6 @@ def compute_model_topk_accuracy(write_path, pred_path, gold_path, mode):
     # Retrieve model data and initialize parameters
     all_preds, all_golds = read_pred_and_data(pred_path, gold_path)
     n_preds_per_gold = len(all_preds) // len(all_golds)
-    # ks = [1] if 'roundtrip' in mode else KS
     topk_hits = {k: [] for k in KS}  # for strict accuracy
     lenk_hits = {k: [] for k in KS}  # for lenient accuracy
     
@@ -80,23 +78,17 @@ def compute_model_topk_accuracy(write_path, pred_path, gold_path, mode):
     write_result_line(write_path, result_line, 'a')
 
 
+def write_result_line(file_path, content, write_or_append):
+    with open(file_path, write_or_append) as f:
+        writer = csv.writer(f); writer.writerow(content)
+
+
 def read_pred_and_data(pred_path, gold_path):
     with open(pred_path, 'r') as p: all_preds = p.readlines()
     with open(gold_path, 'r') as g: all_golds = g.readlines()
     all_preds = [''.join(p.strip().split()) for p in all_preds]
     all_golds = [''.join(g.strip().split()) for g in all_golds]
     return all_preds, all_golds
-
-
-def standardize_molecules(preds, gold, pred_path):
-    if 'selfies' in pred_path:
-        # preds = [sf.decoder(p) for p in preds]
-        # gold = sf.decoder(gold)
-        preds = [create_smiles_from_selfies(p) for p in preds]
-        gold = create_smiles_from_selfies(gold)
-    preds = [canonicalize_smiles(p) for p in preds]
-    gold = canonicalize_smiles(gold)
-    return preds, gold
 
 
 def compute_topk_hit(preds, gold, mode='strict'):
@@ -121,16 +113,22 @@ def compute_topk_hit(preds, gold, mode='strict'):
     return any([hit_fn(pred.split('.'), gold.split('.')) for pred in preds])
 
 
+def standardize_molecules(preds, gold, pred_path):
+    if 'selfies' in pred_path:
+        # preds = [sf.decoder(p) for p in preds]
+        # gold = sf.decoder(gold)
+        preds = [create_smiles_from_selfies(p) for p in preds]
+        gold = create_smiles_from_selfies(gold)
+    preds = [canonicalize_smiles(p) for p in preds]
+    gold = canonicalize_smiles(gold)
+    return preds, gold
+
+
 def canonicalize_smiles(smiles):
     try:
         return Chem.MolToSmiles(Chem.MolFromSmiles(smiles))
     except:  # Boost.Python.ArgumentError
         return smiles
-
-
-def write_result_line(file_path, content, write_or_append):
-    with open(file_path, write_or_append) as f:
-        writer = csv.writer(f); writer.writerow(content)
 
 
 def create_smiles_from_selfies(selfies):
