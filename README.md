@@ -18,29 +18,38 @@ $ python generate_all_datasets.py
 
 * Train all models (long step! here are two different ways)
 ```
-# FOR BOTH WAYS
+# EITHER USE ON YOUR OWN COMPUTER / SERVER (WITH AT LEAST 1 GPU)
 $ python write_train_configs.py  # write configuration files for training
-
-# THEN, EITHER RUN IT ON YOUR OWN COMPUTER / SERVER (WITH AT LEAST 1 GPU)
 $ python write_vocab_and_slurm_files.py -v  # vocabulary generation only
 $ python train_all_models.py  # all training scripts run one by one
 
-# OR RUN IT ON AN HPC CLUSTER
+# OR RUN USE AN HPC CLUSTER
 # -> You should adapt ./data/original/base_slurm.sh to your needs
+# -> You may also need to update write_vocab_and_slurm_files.py to your needs
 # -> You should install a conda environment named "chempred_revision" on your personal HPC space,
 #    where open-nmt is installed with "pip install -e ." from ./open-nmt)
+$ python write_train_configs.py  # write configuration files for training
 $ python write_vocab_and_slurm_files.py -v -s  # vocabulary and slurm script generation
-$ ./sbatch_all_models.sh  # you may need to also update write_vocab_and_slurm_files.py to your needs!
+$ ./sbatch_all_models.sh  # all training scripts ran as soon as there is an available GPU
 ```
 
-* Generate predictions using the test data, with all trained model, and write them to text files
+* Generate predictions using the test data, with all trained model, and write them to text files (again, two ways)
 ```
-$ python write_test_and_roundtrip_configs.py  # write configuration files for testing
-$ python test_and_roundtrip_all_models.py  # generate predictions for all models
+# EITHER USE YOUR OWN COMPUTER / SERVER (WITH AT LEAST 1 GPU)
+$ python write_test_and_roundtrip_configs.py -t  # write configuration files for testing tasks
+$ python test_and_roundtrip_all_models.py -t # generate test predictions for all models
+$ python write_test_and_roundtrip_configs.py -r  # write configuration files for roundtrip tasks, using test outputs
+$ python test_and_roundtrip_all_models.py -r # generate roundtrip predictions for all reactant prediction models
+
+# OR USE AN HPC CLUSTER
+$ python write_test_and_roundtrip_configs.py -t  # write configuration files for testing tasks
+$ ./sbatch_test_all_models.sh # generate test predictions for all models
+$ python write_test_and_roundtrip_configs.py -r  # write configuration files for roundtrip tasks, using test outputs
+$ ./sbatch_roundtrip_all_models.sh # generate roundtrip predictions for all reactant prediction models
 ```
 
-* Evaluate the performance of all models (top-k and roundtrip) and generate all figures
+* Evaluate the performance of all models (top-k and roundtrip accuracies) and generate all figures
 ```
-$ python topk_and_roundtrip_all_models.py
-$ python create_figures_x_and_y.py  # coming soon
+$ python evaluate_all_models.py
+$ python plot_all_result_figures.py
 ```
