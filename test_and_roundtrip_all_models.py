@@ -6,7 +6,7 @@ parser.add_argument('-r', '--roundtrip', action='store_true')
 args = parser.parse_args()
 
 
-TEST_SCRIPT = 'python open-nmt/translate.py'
+TRANSLATE_SCRIPT = 'python open-nmt/translate.py'
 CONFIGS_DIR = os.path.join('.', 'configs')
 MODES = ['test', 'test-50k', 'roundtrip', 'roundtrip-50k']
 FOLDS = [1, 2, 5, 10, 20]
@@ -31,7 +31,6 @@ def main():
                          '\nand only then generate roundtrip predictions.')
     for mode in modes_to_run:
         generate_predictions_with_all_models(mode=mode)
-        print('Predictions generated for %s tasks!' % mode)
 
 
 def generate_predictions_with_all_models(mode):
@@ -39,7 +38,7 @@ def generate_predictions_with_all_models(mode):
         if '%s.yml' % mode in files:
             config_path = os.path.join(folder, '%s.yml' % mode)
             print('Starting %s' % config_path)
-            # os.system('%s -config %s' % (TEST_SCRIPT, config_path))
+            os.system('%s -config %s' % (TRANSLATE_SCRIPT, config_path))
             print('Done %s' % config_path)
 
 
