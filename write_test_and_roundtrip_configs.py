@@ -1,4 +1,9 @@
 import os
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument('-t', '--test', action='store_true')
+parser.add_argument('-r', '--roundtrip', action='store_true')
+args = parser.parse_args()
 
 
 DATA_DIR = os.path.abspath('data')
@@ -6,6 +11,8 @@ LOGS_DIR = os.path.abspath('logs')
 CONFIGS_DIR = os.path.abspath('configs')
 BASE_CONFIG_PATH = os.path.abspath(
     os.path.join('data', 'original', 'base_test.yml'))
+DO_TEST = args.test
+DO_ROUNDTRIP = args.roundtrip
 CKPT_SELECTION_MODE = 'last'  # 'first', 'last', 'best'
 MODES = ['test', 'test-50k', 'roundtrip', 'roundtrip-50k']
 ROUNDTRIP_SPECS = ['atom', 'smiles', 'from-scratch']
@@ -20,11 +27,27 @@ USPTO_50K_TASKS = [
 
 
 def main():
-    for mode in MODES:
+    if DO_TEST: modes_to_run = [m for m in MODES if 'test' in m]
+    if DO_ROUNDTRIP: modes_to_run = [m for m in MODES if 'roundtrip' in m]
+    if not DO_TEST and not DO_ROUNDTRIP:
+        raise ValueError('Use this script with one of the following argument:'\
+                         '\n-t to write test config scripts'\
+                         '\n-r to write roundtrip config scripts '\
+                         '(only after tests are run!)')
+    if DO_TEST and DO_ROUNDTRIP:
+        raise ValueError('You should use this script with only one argument.'\
+                         '\n-t to write test config scripts'\
+                         '\n-r to write roundtrip config scripts'\
+                         '\nThe idea is to first generate the test scripts,'\
+                         '\nthen generate test predictions with the model,'\
+                         '\nand only then generate roundtrip config scripts.')
+    for mode in modes_to_run:
         reset_test_and_roundtrip_configs(mode=mode)
         generate_config_folder(mode=mode)
         print('Configuration files generated for %s!' % mode)
-        
+    if DO_TEST: print('Test config files generated successfully!')
+    if DO_ROUNDTRIP: print('Roundtrip config files generated successfully!')
+
 
 def generate_config_folder(mode):
     for folder, _, files in os.walk(LOGS_DIR):
