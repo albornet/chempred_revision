@@ -3,7 +3,7 @@ save_data: $LOGS_FOLDER$SEPsave_data
 
 # Save vocabulary
 src_vocab: $DATA_FOLDER$SEPsrc_vocab.vocab
-share_vocab: True
+$VOCAB_TEXT
 
 # Prevent overwriting of existing files (or not)
 overwrite: True
