@@ -12,7 +12,7 @@ LOGS_DIR = os.path.abspath('logs')
 DATA_DIR = os.path.abspath('data')
 RESULTS_DIR = os.path.abspath('results')
 KS = [1, 3, 5, 10]
-MODES = ['test', 'test-50k', 'roundtrip', 'roundtrip-50k']
+MODES = ['test']  # , 'test-50k', 'roundtrip', 'roundtrip-50k']
 SPECS = ['task', 'format', 'token', 'embed', 'augment']
 HEADERS = SPECS + ['top-%s' % k for k in KS] + ['lenient-%s' % k for k in KS]
 
@@ -30,7 +30,7 @@ def evaluate_models(mode):
     for folder, _, files in os.walk(LOGS_DIR):
         if '%s_predictions.txt' % mode in files:
             args_to_run.append((folder, result_file_path, mode))
-    n_cpus_used = max(1, os.cpu_count() // 4)
+    n_cpus_used = max(1, os.cpu_count() // 2)
     with Pool(n_cpus_used) as pool:
         pool.map(evaluate_one_model, args_to_run)
     sort_csv(result_file_path, sort_column_order=[0, 1, 2, 4, 3])
@@ -58,14 +58,16 @@ def compute_model_topk_accuracy(write_path, pred_path, gold_path, mode):
     
     # Compute all top-k accuracies for this model
     progress_bar = tqdm(list(enumerate(all_golds)))
+    topk_mode = 'strict'  # if 'reagent' in pred_path else 'all'
+    lenk_mode = 'any'
     for i, gold in progress_bar:
         progress_bar.set_description('Computing %s accuracy' % mode)
         preds = all_preds[i * n_preds_per_gold:(i + 1) * n_preds_per_gold]
         preds, gold = standardize_molecules(preds, gold, pred_path)
         [topk_hits[k].append(
-            compute_topk_hit(preds[:k], gold, mode='all')) for k in KS]
+            compute_topk_hit(preds[:k], gold, mode=topk_mode)) for k in KS]
         [lenk_hits[k].append(
-            compute_topk_hit(preds[:k], gold, mode='any')) for k in KS]
+            compute_topk_hit(preds[:k], gold, mode=lenk_mode)) for k in KS]
     
     # Write results for this model in a common file
     _, task, format, token, augment, embed, _ =\
@@ -110,7 +112,8 @@ def compute_topk_hit(preds, gold, mode='strict'):
     else:
         raise ValueError('Incorrect mode for compute hit function')
     # Requirement: at least one of preds (list of length k) deserves a hit
-    return any([hit_fn(pred.split('.'), gold.split('.')) for pred in preds])
+    return any([hit_fn(remove_duplicates(pred.split('.')),
+                       remove_duplicates(gold.split('.'))) for pred in preds])
 
 
 def standardize_molecules(preds, gold, pred_path):
@@ -144,6 +147,12 @@ def create_smiles_from_selfies(selfies):
                 smiles_mol = '?'
             smiles_mols.append(smiles_mol)
         return '.'.join(smiles_mols)
+
+
+def remove_duplicates(sequence):
+    seen = set()
+    seen_add = seen.add
+    return [x for x in sequence if not (x in seen or seen_add(x))]
 
 
 def sort_csv(filepath, sort_column_order):
