@@ -50,10 +50,12 @@ MARKERS = {
     'reactant-pred-single': '>',
     'reagent-pred': 'o'    
 }
-LINE_PARAMS =  {'lw': 1,
-                'markeredgewidth': 1,
-                'markeredgecolor': 'k',
-                'markersize': 8}
+LINE_PARAMS =  {
+    'lw': 1,
+    'markeredgewidth': 1,
+    'markeredgecolor': 'k',
+    'markersize': 8
+}
 
 
 def do_plot():
