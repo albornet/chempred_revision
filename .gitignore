@@ -132,6 +132,7 @@ dmypy.json
 logs/*
 configs/*
 slurm/*
+results/*
 data/product-pred/*
 data/product-pred-noreag/*
 data/reactant-pred/*
@@ -141,3 +142,4 @@ data/reagent-pred/*
 open-nmt/.github/*
 open-nmt/.gitignore
 *.tiff
+*.pickle
