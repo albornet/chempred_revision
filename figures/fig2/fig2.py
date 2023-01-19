@@ -79,7 +79,7 @@ def plot_one_table(ax, mode, data, topk):
         to_plot = [d[TOPKS.index(topk)] for d in data[task]]
         color, marker = COLORS[task], MARKERS[task]
         ax.plot(X_AXIS, to_plot, color, **LINE_PARAMS, marker=marker, label=task)
-
+        
     ax.set_ylabel('Top-%s accuracy' % topk, fontsize=LABEL_FONTSIZE)
     ax.set_ylim(*Y_RANGE)
     ax.set_yticks(Y_AXIS[0::2])

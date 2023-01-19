@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import selfies as sf
+import pickle
+from itertools import chain
 from tqdm.auto import trange
 from collections import defaultdict
 from typing import List, Tuple, Dict, Union
@@ -27,23 +29,33 @@ PRED_PATH = os.path.join(LOGS_DIR,
                          'x1',
                          'from-scratch',
                          'test_predictions.txt')
-FIG_PATH = os.path.join(FILE_DIR, 'fig4.tiff')
 NUM_PRED = 10  # how many predictions per sample
 MAX_REAGENTS = 12  # up to how many reagents per reaction the analysis goes
+REAGENTS_PER_REACTION = range(1, MAX_REAGENTS + 1)
+TOPKS = (1, 3, 5, 10)
+LABEL_FONTSIZE = 16
+TICK_FONTSIZE = 14
+LOAD_DATA = False
 
 
 def do_plot():
-    # Load predictions and true labels
-    predictions = load_reagents(PRED_PATH, NUM_PRED)
-    labels = load_reagents(GOLD_PATH)
-
-    # Cluster the instances by number of true reagents
-    clusters = cluster_by_num_reagents(labels, predictions)
+    # Load predictions and true labels and cluster by number of true reagents
+    if LOAD_DATA:
+        with open(os.path.join(FILE_DIR, 'fig45_data.pickle'), 'rb') as f:
+            clusters = pickle.load(f)
+    else:
+        predictions = load_reagents(PRED_PATH, NUM_PRED)
+        labels = load_reagents(GOLD_PATH)
+        clusters = cluster_by_num_reagents(labels, predictions)
+        with open(os.path.join(FILE_DIR, 'fig45_data.pickle'), 'wb') as f:
+            pickle.dump(clusters, f)
 
     # Compute accuracy as a function of number of true reagents
-    # and number of prediction considered
     matrix = topn_accuracy_matrix(clusters, NUM_PRED)
-    save_accuracy_matrix_as_heatmap(matrix.iloc[:MAX_REAGENTS, :], FIG_PATH)
+    
+    # Plot figure 4
+    fig4_path = os.path.join(FILE_DIR, 'fig4.tiff')
+    plot_figure_4(matrix.iloc[:MAX_REAGENTS, :], fig4_path)
     print('- Plotted figure 4 at %s!' % FILE_DIR)
 
 
@@ -52,7 +64,7 @@ def standardize_molecules(sample_line: str, fmt: str = 'smiles') -> List[str]:
     Clean and standardize molecules.
 
     Parameters:
-        sample_line (str): The string representation of a molecule.
+        sample_line (str): The string representation of molecules.
         fmt (str): The format of the input molecule string. 
             'smiles' (default) or 'selfies'
 
@@ -148,14 +160,14 @@ def load_reagents(path: str,
                 for i in trange(0,
                                len(lines),
                                num_pred_per_instance,
-                               desc='Loading data for figure 4',
+                               desc='Loading data for figure 4 and 5',
                                leave=False)]
     else:
         return [lines[i:i + num_pred_per_instance]
                 for i in trange(0,
                                 len(lines),
                                 num_pred_per_instance,
-                                desc='Loading data for figure 4',
+                                desc='Loading data for figure 4 and 5',
                                 leave=False)]
 
 
@@ -210,25 +222,6 @@ def is_in_top(y_true: List[List[str]], y_hat: List[List[str]], n: int) -> bool:
     return y_true[0] in y_hat[:n]
 
 
-def is_in_top_lenient(y_true: List[List[str]],
-                      y_hat: List[List[str]], n: int) -> bool:
-    """
-    Check if the true value is in the top n predictions using lenient match
-    i.e. we do not penalize the excess of reagents.
-
-    Parameters:
-        y_true (List[List[str]]): A list of true values.
-        y_hat (List[List[str]]): A list of predictions.
-        n (int): Number of top predictions to check.
-
-    Returns:
-        A boolean indicating if the true value is in the top n predictions.
-    """
-    # Check if the true value is in the top n predictions
-    return sum(all(elem in y_hat_i for elem in y_true[0])
-               for y_hat_i in y_hat[:n]) >= 1
-
-
 def topn_accuracy(cluster: List[Tuple[List[List[str]], List[List[str]]]],
                   n: int) -> float:
     """
@@ -250,34 +243,6 @@ def topn_accuracy(cluster: List[Tuple[List[List[str]], List[List[str]]]],
         # Increment the correct counter if the true value is
         # in the top n predictions
         correct += is_in_top(y_true, y_hat, n) * 1
-    # Compute the accuracy
-    accuracy = correct / len(cluster)
-    return accuracy
-
-
-def topn_accuracy_lenient(cluster: List[Tuple[List[List[str]],
-                                              List[List[str]]]],
-                          n: int) -> float:
-    """
-    Compute the top-n accuracy for the given cluster of true values and
-    predictions using lenient match i.e. we do not penalize
-    the excess of reagents.
-
-    Parameters:
-        cluster (List[Tuple[List[List[str]], List[List[str]]]]): A list of
-        tuples of true values and predictions.
-        n (int): Number of top predictions to consider.
-
-    Returns:
-        A float indicating the top-n accuracy of the predictions.
-    """
-    # Initialize a variable to store the number of correct predictions
-    correct = 0
-    # Iterate over the true values and predictions in the cluster
-    for y_true, y_hat in cluster:
-        # Increment the correct counter if the true value is
-        # in the top n predictions
-        correct += is_in_top_lenient(y_true, y_hat, n) * 1
     # Compute the accuracy
     accuracy = correct / len(cluster)
     return accuracy
@@ -310,40 +275,10 @@ def topn_accuracy_matrix(clusters: dict, max_n: int) -> pd.DataFrame:
     return df
 
 
-def topn_accuracy_matrix_lenient(clusters: dict, max_n: int) -> pd.DataFrame:
-    """
-    Create a DataFrame with top-n accuracy for all clusters, with the number
-    of reagents and the accuracy as rows and columns respectively using lenient
-    match i.e. we do not penalize the excess of reagents.
-
-    Parameters:
-        clusters (dict) : Dictionary with the cluster of values and predictions
-        max_n (int) : Maximum number of top predictions to consider as correct
-
-    Returns:
-        pd.DataFrame : DataFrame with top-n accuracy for all clusters,
-        with the number of reagents and the accuracy
-        as rows and columns respectively
-    """
-    # Create an empty DataFrame
-    df = pd.DataFrame(index=[f"# Reagents {i}" for i in range(1, max_n + 1)],
-                      columns=[f"Top {i}" for i in range(1, max_n + 1)],
-                      dtype="float")
-
-    for key, value in clusters.items():
-        for i in range(1, max_n + 1):
-            # Compute the top-n accuracy for the current cluster
-            accuracy = topn_accuracy_lenient(value, i)
-            # Set the corresponding value in the DataFrame
-            df.at[f"# Reagents {key}", f"Top {i}"] = accuracy
-    return df
-
-
-def save_accuracy_matrix_as_heatmap(data: pd.DataFrame,
-                                    path: str = '_.tiff',
-                                    colorbar: bool = False,
-                                    figsize: tuple = (8, 8),
-                                    fontsize: int = 14) -> None:
+def plot_figure_4(data: pd.DataFrame,
+                  path: str = '_.tiff',
+                  colorbar: bool = False,
+                  figsize: tuple = (8, 8)) -> None:
     """
     This function plots a heatmap of the input accuracy matrix.
     The x-axis shows the 'top N' accuracy, and the y-axis shows
@@ -369,12 +304,15 @@ def save_accuracy_matrix_as_heatmap(data: pd.DataFrame,
     pc = ax.pcolormesh(data)
     if colorbar:
         plt.colorbar(pc)
-    ax.set_xlabel('Top N accuracy', fontsize=fontsize+2)
-    ax.set_ylabel('Number of reagents', fontsize=fontsize+2)
+    ax.set_xlabel('Top-k accuracy', fontsize=LABEL_FONTSIZE)
+    ax.set_ylabel('Number of true reagents per reaction',
+                  fontsize=LABEL_FONTSIZE)
     ax.set_xticks(np.linspace(1, 10, 10)-0.5)
-    ax.set_xticklabels(np.linspace(1, 10, 10, dtype=int), fontsize=fontsize)
+    ax.set_xticklabels(np.linspace(1, 10, 10, dtype=int),
+                       fontsize=TICK_FONTSIZE)
     ax.set_yticks(np.linspace(1, 12, 12)-0.5)
-    ax.set_yticklabels(np.linspace(1, 12, 12, dtype=int), fontsize=fontsize)
+    ax.set_yticklabels(np.linspace(1, 12, 12, dtype=int),
+                       fontsize=TICK_FONTSIZE)
     for i in range(data.shape[0]):
         for j in range(data.shape[1]):
             ax.text(j + 0.5,
@@ -383,7 +321,7 @@ def save_accuracy_matrix_as_heatmap(data: pd.DataFrame,
                     va='center',
                     ha='center',
                     color='white',
-                    fontsize=fontsize,
+                    fontsize=TICK_FONTSIZE,
                     fontweight='bold')
     plt.tight_layout()
     plt.savefig(path, dpi=300)

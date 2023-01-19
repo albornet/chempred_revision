@@ -28,7 +28,7 @@ LINE_PARAMS =  {'lw': 1,
 def do_plot():
     plot_one_figure()
     plot_one_figure(appendix='-50k')
-    print('- Plotted figure 3 and 50k appendix at %s!' % FILE_DIR)
+    print('- Plotted figure 3 at %s!' % FILE_DIR)
 
 
 def plot_one_figure(appendix=''):
