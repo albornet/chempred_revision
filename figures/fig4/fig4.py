@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import selfies as sf
 import pickle
-from itertools import chain
 from tqdm.auto import trange
 from collections import defaultdict
 from typing import List, Tuple, Dict, Union
@@ -51,7 +50,7 @@ def do_plot():
             pickle.dump(clusters, f)
 
     # Compute accuracy as a function of number of true reagents
-    matrix = topn_accuracy_matrix(clusters, NUM_PRED)
+    matrix = topk_accuracy_matrix(clusters, NUM_PRED)
     
     # Plot figure 4
     fig4_path = os.path.join(FILE_DIR, 'fig4.tiff')
@@ -71,14 +70,10 @@ def standardize_molecules(sample_line: str, fmt: str = 'smiles') -> List[str]:
     Returns:
         A list of standardized and cleaned molecules.
     """
-    # Removing all whitespace characters from the input line
     sample_line = ''.join(sample_line.strip().split())
-    # If format is selfies, convert the input to SMILES
     if fmt == 'selfies':
         sample_line = create_smiles_from_selfies(sample_line)
-    # Canonicalize the SMILES representation
     sample_line = canonicalize_smiles(sample_line)
-    # Return the standardize molecules
     return sorted(sample_line.split('.'))
 
 
@@ -93,10 +88,8 @@ def canonicalize_smiles(smiles: str) -> str:
         The canonical form of the SMILES string.
     """
     try:
-        # Using RDKit library to canonicalize the smiles
         return Chem.MolToSmiles(Chem.MolFromSmiles(smiles))
     except:
-        # Returning the input smiles in case of any exception
         return smiles
 
 
@@ -113,18 +106,14 @@ def create_smiles_from_selfies(selfies: str) -> Union[str, List[str]]:
         If the input is multiple line, it will return list of strings
     """
     try:
-        # Using Selfies library to decode the selfies
         return sf.decoder(selfies)
     except sf.DecoderError:
-        # If there is any error with the input. It will split the selfies by '.'
         selfies_mols = selfies.split('.')
         smiles_mols = []
         for selfies_mol in selfies_mols:
             try:
-                # Again using selfies library to decode each molecule
                 smiles_mol = sf.decoder(selfies_mol)
             except sf.DecoderError:
-                # If the above decode fails then it will append '?'
                 smiles_mol = '?'
             smiles_mols.append(smiles_mol)
         return smiles_mols
@@ -148,12 +137,8 @@ def load_reagents(path: str,
         A list of lists of SMILES strings, where each sublist contains 
         `num_pred_per_instance` SMILES strings.
     """
-
-    # Open the file at the specified path in read mode
     with open(path, "r") as p:
-        # Read all the lines
         lines = p.read().splitlines()
-    # Chunk the lines into sublists with num_pred_per_instance lines per sublist
     if standardize:
         return [[standardize_molecules(j)
                 for j in lines[i:i + num_pred_per_instance]]
@@ -189,89 +174,61 @@ def cluster_by_num_reagents(leading_lists: List[List[List[str]]],
         and the values are the lists of tuples where tuple includes the leading
         lists and subordinate lists that match that number of elements.
     """
-    # Create a defaultdict to store the clusters
     clusters = defaultdict(list)
-    # Iterate over the leading and subordinate lists
     for leading_sublist1, subordinate_sublist1 in zip(leading_lists,
                                                       subordinate_lists):
-        # Iterate over the leading sublists in the outer list
         for leading_sublist2 in leading_sublist1:
-            # Get the length of the leading_sublist2
             subsublist_len = len(leading_sublist2)
-            # Append the tuple of leading and subordinate sublists
-            # to the appropriate cluster
             clusters[subsublist_len].append(
                 (leading_sublist1, subordinate_sublist1))
-    # Sort the clusters by key and return as a dictionary
     return dict(sorted(clusters.items()))
 
 
-def is_in_top(y_true: List[List[str]], y_hat: List[List[str]], n: int) -> bool:
+def topk_accuracy(cluster: List[Tuple[List[List[str]], List[List[str]]]],
+                  k: int) -> float:
     """
-    Check if the true value is in the top n predictions.
-
-    Parameters:
-        y_true (List[List[str]]): A list of true values.
-        y_hat (List[List[str]]): A list of predictions.
-        n (int): Number of top predictions to check.
-
-    Returns:
-        A boolean indicating if the true value is in the top n predictions.
-    """
-    # Check if the true value is in the top n predictions
-    return y_true[0] in y_hat[:n]
-
-
-def topn_accuracy(cluster: List[Tuple[List[List[str]], List[List[str]]]],
-                  n: int) -> float:
-    """
-    Compute the top-n accuracy for the given cluster
+    Compute the top-k accuracy for the given cluster
     of true values and predictions.
 
     Parameters:
         cluster (List[Tuple[List[List[str]], List[List[str]]]]): A list of
         tuples of true values and predictions.
-        n (int): Number of top predictions to consider.
+        k (int): Number of top predictions to consider.
 
     Returns:
-        A float indicating the top-n accuracy of the predictions.
+        A float indicating the top-k accuracy of the predictions.
     """
-    # Initialize a variable to store the number of correct predictions
     correct = 0
-    # Iterate over the true values and predictions in the cluster
     for y_true, y_hat in cluster:
-        # Increment the correct counter if the true value is
-        # in the top n predictions
-        correct += is_in_top(y_true, y_hat, n) * 1
-    # Compute the accuracy
+        # Increment if the true value is in the top n predictions
+        correct += int(y_true[0] in y_hat[:k])
     accuracy = correct / len(cluster)
     return accuracy
 
 
-def topn_accuracy_matrix(clusters: dict, max_n: int) -> pd.DataFrame:
+def topk_accuracy_matrix(clusters: dict, max_k: int) -> pd.DataFrame:
     """
-    Create a DataFrame with top-n accuracy for all clusters, with the number
+    Create a DataFrame with top-k accuracy for all clusters, with the number
     of reagents and the accuracy as rows and columns respectively
 
     Parameters:
         clusters (dict) : Dictionary with the cluster of values and predictions
-        max_n (int) : Maximum number of top predictions to consider as correct
+        max_k (int) : Maximum number of top predictions to consider
 
     Returns:
-        pd.DataFrame : DataFrame with top-n accuracy for all clusters, with
+        pd.DataFrame : DataFrame with top-k accuracy for all clusters, with
         the number of reagents and the accuracy as rows and columns respectively
     """
-    # Create an empty DataFrame
-    df = pd.DataFrame(index=[f"# Reagents {i}" for i in range(1, max_n + 1)],
-                      columns=[f"Top {i}" for i in range(1, max_n + 1)],
+    df = pd.DataFrame(index=[f"# Reagents {i}" for i in range(1, max_k + 1)],
+                      columns=[f"Top {i}" for i in range(1, max_k + 1)],
                       dtype="float")
 
     for key, value in clusters.items():
-        for i in range(1, max_n + 1):
-            # Compute the top-n accuracy for the current cluster
-            accuracy = topn_accuracy(value, i)
-            # Set the corresponding value in the DataFrame
-            df.at[f"# Reagents {key}", f"Top {i}"] = accuracy
+        for k in range(1, max_k + 1):
+            # Compute the top-k accuracy for the current cluster
+            accuracy = topk_accuracy(value, k)
+            df.at[f"# Reagents {key}", f"Top {k}"] = accuracy
+
     return df
 
 

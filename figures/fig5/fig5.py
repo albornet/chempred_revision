@@ -1,16 +1,8 @@
 import os
-import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
-import selfies as sf
 import pickle
 from itertools import chain
-from tqdm.auto import trange
-from collections import defaultdict
-from typing import List, Tuple, Dict, Union
-from rdkit import Chem
-from rdkit import RDLogger
-RDLogger.DisableLog('rdApp.*')
+from typing import List, Tuple, Union
 
 
 FILE_DIR = os.path.split(__file__)[0]
@@ -127,21 +119,20 @@ def plot_rec_prec_f1(ax, clusters, topk):
     scores = [topk_scores(clusters[i], topk) for i in range(1, 13)]
     prec, rec, f1 = [[s[i] for s in scores] for i in range(3)]
     avg_prec, avg_rec, avg_f1 = [sum(v) / len(v) for v in (prec, rec, f1)]
-    ax.set_title(
-        'Average scores @%s: precision: %.2f, recall: %.2f, f1-score: %.2f\n'
-        % (topk, avg_prec, avg_rec, avg_f1),
-        fontsize=LABEL_FONTSIZE)
     ax.plot(REAGENTS_PER_REACTION, scores, **LINE_PARAMS)
     ax.set_ylabel('Top-%s accuracy' % topk, fontsize=LABEL_FONTSIZE)
     ax.set_ylim([0, 1])
     y_axis = [y / 10 for y in range(11)]
     ax.set_yticks(y_axis[::2])
     ax.set_yticks(y_axis, minor=True)
-    ax.set_xlabel('Data augmentation level', fontsize=LABEL_FONTSIZE)
+    ax.set_xlabel('Number of true reagents per reaction',
+                  fontsize=LABEL_FONTSIZE)
     ax.set_xticks(REAGENTS_PER_REACTION)
     ax.tick_params(labelsize=TICK_FONTSIZE)
     ax.grid(which='both')
-    ax.legend(['precision', 'recall', 'f1-score'], fontsize=TICK_FONTSIZE)
+    ax.legend(['precision (average: %.2f)' % avg_prec,
+               'recall (average: %.2f)' % avg_rec,
+               'f1-score (average: %.2f)' % avg_f1], fontsize=TICK_FONTSIZE)
 
 
 def plot_figure_5(clusters, path, topks, figsize=(9, 9)):

@@ -65,12 +65,12 @@ def do_plot():
 
 
 def plot_one_figure(topk, appendix=''):
-    result_path = os.path.join(DATA_DIR, 'results_test%s.csv' % appendix)
-    data = get_data(result_path)  # dictionary, keys are tasks
+    data_path = os.path.join(DATA_DIR, 'results_test%s.csv' % appendix)
+    save_path = os.path.join(FILE_DIR, 'fig2%s-top%s.tiff' % (appendix, topk))
+    data = get_data(data_path)  # dictionary, keys are tasks
     fig = plt.figure(figsize=(9, 5))
     ax = fig.add_subplot()
     plot_one_table(ax, mode='test%s' % appendix, data=data, topk=topk)
-    save_path = os.path.join(FILE_DIR, 'fig2%s-top%s.tiff' % (appendix, topk))
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
 
 
