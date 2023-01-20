@@ -21,7 +21,7 @@ TASKS = [
     'reagent-pred'
 ]
 USPTO_50K_TASKS = [t for t in TASKS if t != 'reagent-pred']
-FOLDS = [1, 2, 5, 10, 20]
+FOLDS = [1]  #, 2, 5, 10, 20]
 SPLITS = ['test', 'val', 'train']
 DATA_DIR = os.path.abspath('data')
 ORIGINAL_DIR = os.path.join(DATA_DIR, 'original')
@@ -48,7 +48,8 @@ def create_smiles_datasets():
 
 def create_selfies_datasets():
     print('\nStarted generating selfies datasets from smiles datasets')
-    for folder, files in filter_data_folders(additional_filter='smiles'):
+    for folder, files in filter_data_folders(additional_filters=['smiles',
+                                                                 'atom']):
         for smiles_file in filter_data_files(files):
             smiles_full_path = os.path.join(folder, smiles_file)
             write_selfies_file_from_smiles_file(smiles_full_path)
@@ -56,7 +57,7 @@ def create_selfies_datasets():
 
 def create_spe_datasets():
     print('\nStarted generating spe datasets from atom-tokenized datasets')
-    for folder, files in filter_data_folders(additional_filter='atom'):
+    for folder, files in filter_data_folders(additional_filters=['atom']):
         for atom_file in filter_data_files(files):
             atom_full_path = os.path.join(folder, atom_file)
             write_spe_file_from_atom_file(atom_full_path)
@@ -70,11 +71,11 @@ def create_w2v_embeddings():
         write_embedding_vectors(folder, w2v_vectors)
 
 
-def filter_data_folders(additional_filter=''):
+def filter_data_folders(additional_filters=[]):
    return [(folder, files) for folder, _, files in os.walk(DATA_DIR)
             if 'x1' in folder and 'x10' not in folder
-            and '-single' not in folder and '-noreag' not in folder
-            and additional_filter in folder]
+            # and '-single' not in folder and '-noreag' not in folder
+            and all([f in folder for f in additional_filters])]
 
 
 def filter_data_files(files):

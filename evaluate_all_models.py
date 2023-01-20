@@ -12,7 +12,7 @@ LOGS_DIR = os.path.abspath('logs')
 DATA_DIR = os.path.abspath('data')
 RESULTS_DIR = os.path.abspath('results')
 KS = [1, 3, 5, 10]
-MODES = ['test']  # , 'test-50k', 'roundtrip', 'roundtrip-50k']
+MODES = ['test', 'test-50k', 'roundtrip', 'roundtrip-50k']
 SPECS = ['task', 'format', 'token', 'embed', 'augment']
 HEADERS = SPECS + ['top-%s' % k for k in KS] + ['lenient-%s' % k for k in KS]
 

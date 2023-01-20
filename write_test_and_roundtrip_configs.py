@@ -127,7 +127,8 @@ def select_ckpt_path(ckpt_folder):
 
 def write_roundtrip_data(data_path, output_path):
     reac_pred_path = output_path.replace('roundtrip', 'test')
-    with open(reac_pred_path, 'r') as f: reac_pred_lines = f.readlines()
+    with open(reac_pred_path, 'r') as f:
+        reac_pred_lines = f.readlines()
     if '-noreag' not in output_path and '-50k' not in output_path:
         reac_reag_path = os.path.join(DATA_DIR, 'original', 'src-test.txt')
         with open(reac_reag_path, 'r') as f_r,\

@@ -24,8 +24,7 @@ SHARE_VOCAB_TEXT = """share_vocab: True"""
 def main():
     for folder, subfolders, _ in os.walk(DATA_DIR):
         if len(subfolders) == 0:
-            if 'x1' in folder and 'x10' not in folder\
-            and '-single' not in folder and '-noreag' not in folder:
+            if 'x1' in folder and 'x10' not in folder:
                 setup_train_configs(folder, EMBED_TYPES)
             elif 'original' not in folder:
                 setup_train_configs(folder, [EMBED_TYPES[0]])
