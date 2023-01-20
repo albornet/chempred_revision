@@ -23,14 +23,14 @@ $ python write_train_configs.py  # write configuration files for training
 $ python write_vocab_and_slurm_files.py -v  # vocabulary generation only
 $ python train_all_models.py  # all training scripts run one by one
 
-# OR RUN USE AN HPC CLUSTER
+# OR USE AN HPC CLUSTER
 # -> You should adapt ./data/original/base_slurm.sh to your needs
 # -> You may also need to update write_vocab_and_slurm_files.py to your needs
 # -> You should install a conda environment named "chempred_revision" on your personal HPC space,
 #    where open-nmt is installed with "pip install -e ." from ./open-nmt)
 $ python write_train_configs.py  # write configuration files for training
 $ python write_vocab_and_slurm_files.py -v -s  # vocabulary and slurm script generation
-$ ./sbatch_all_models.sh  # all training scripts ran as soon as there is an available GPU
+$ ./sbatch_all_models.sh  # all training scripts run as soon as there is an available GPU
 ```
 
 * Generate predictions using the test data, with all trained model, and write them to text files (again, two ways)
