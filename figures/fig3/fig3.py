@@ -52,6 +52,7 @@ def plot_one_figure(appendix=''):
 def plot_one_table(ax, mode, data):
     title = TITLES[mode]
     legend_loc = 'upper center' if mode == 'reac_pred-50k' else 'lower center'
+    n_legend_cols = 1 if 'Roundtrip' in title else 2
     if 'Roundtrip' in title:
         ax.plot(X_AXIS, data['strict_reag+'], 'C1', **LINE_PARAMS,
                 marker='o', label='With reagents')
@@ -76,7 +77,9 @@ def plot_one_table(ax, mode, data):
     ax.set_xticklabels([s.replace('x0', 'x') for s in DATA_AUGMENTATIONS])
     ax.tick_params(labelsize=TICK_FONTSIZE)
     ax.grid(which='both')
-    ax.legend(fontsize=TICK_FONTSIZE, ncol=2, loc=legend_loc)
+    ax.legend(fontsize=TICK_FONTSIZE,
+              ncol=n_legend_cols,
+              loc=legend_loc)
 
 
 def get_data(file_path):

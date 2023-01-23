@@ -31,30 +31,37 @@ PRED_PATH = os.path.join(LOGS_DIR,
 NUM_PRED = 10  # how many predictions per sample
 MAX_REAGENTS = 12  # up to how many reagents per reaction the analysis goes
 REAGENTS_PER_REACTION = range(1, MAX_REAGENTS + 1)
-TOPKS = (1, 3, 5, 10)
+TOPKS = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 LABEL_FONTSIZE = 16
 TICK_FONTSIZE = 14
-LOAD_DATA = False
+FOLDS = [1, 2, 5, 10, 20]
+LOAD_DATA = False  # False
 
 
 def do_plot():
-    # Load predictions and true labels and cluster by number of true reagents
-    if LOAD_DATA:
-        with open(os.path.join(FILE_DIR, 'fig45_data.pickle'), 'rb') as f:
-            clusters = pickle.load(f)
-    else:
-        predictions = load_reagents(PRED_PATH, NUM_PRED)
-        labels = load_reagents(GOLD_PATH)
-        clusters = cluster_by_num_reagents(labels, predictions)
-        with open(os.path.join(FILE_DIR, 'fig45_data.pickle'), 'wb') as f:
-            pickle.dump(clusters, f)
-
-    # Compute accuracy as a function of number of true reagents
-    matrix = topk_accuracy_matrix(clusters, NUM_PRED)
-    
-    # Plot figure 4
-    fig4_path = os.path.join(FILE_DIR, 'fig4.tiff')
-    plot_figure_4(matrix.iloc[:MAX_REAGENTS, :], fig4_path)
+    for fold in FOLDS:
+        data_path = os.path.join(FILE_DIR, 'fig45-x%s_data.pickle' % fold)
+        
+        # Load predictions and true labels and cluster by number of true reagents
+        if LOAD_DATA:
+            with open(data_path, 'rb') as f:
+                clusters = pickle.load(f)
+        else:
+            pred_path = PRED_PATH.replace('x1', 'x%s' % fold)
+            gold_path = GOLD_PATH.replace('x1', 'x%s' % fold)
+            predictions = load_reagents(pred_path, fold, max(TOPKS))
+            labels = load_reagents(gold_path, fold, 1)
+            clusters = cluster_by_num_reagents(labels, predictions)
+            with open(data_path, 'wb') as f:
+                pickle.dump(clusters, f)
+                
+        # Compute accuracy as a function of number of true reagents
+        matrix = topk_accuracy_matrix(clusters)
+        
+        # Plot figure 4
+        fig4_path = os.path.join(FILE_DIR, 'fig4-x%s.tiff' % fold)
+        plot_figure_4(matrix.iloc[:MAX_REAGENTS, :], fig4_path)
+        
     print('- Plotted figure 4 at %s!' % FILE_DIR)
 
 
@@ -120,6 +127,7 @@ def create_smiles_from_selfies(selfies: str) -> Union[str, List[str]]:
 
 
 def load_reagents(path: str,
+                  fold: int,
                   num_pred_per_instance: int = 1,
                   standardize: bool = True) -> List[List[str]]:
     """
@@ -128,6 +136,7 @@ def load_reagents(path: str,
 
     Parameters:
         path (str): The path to the file containing the reagent strings.
+        fold (int): Level of data augmentation being loaded
         num_pred_per_instance (int): The number of reagent strings to include
         in each sublist. Default one.
         standardize (bool): If returned reagent should be standardized or not.
@@ -137,6 +146,7 @@ def load_reagents(path: str,
         A list of lists of SMILES strings, where each sublist contains 
         `num_pred_per_instance` SMILES strings.
     """
+    loading_descr = 'Loading x%s data for figures 4 and 5' % fold
     with open(path, "r") as p:
         lines = p.read().splitlines()
     if standardize:
@@ -145,14 +155,14 @@ def load_reagents(path: str,
                 for i in trange(0,
                                len(lines),
                                num_pred_per_instance,
-                               desc='Loading data for figure 4 and 5',
+                               desc=loading_descr,
                                leave=False)]
     else:
         return [lines[i:i + num_pred_per_instance]
                 for i in trange(0,
                                 len(lines),
                                 num_pred_per_instance,
-                                desc='Loading data for figure 4 and 5',
+                                desc=loading_descr,
                                 leave=False)]
 
 
@@ -206,25 +216,24 @@ def topk_accuracy(cluster: List[Tuple[List[List[str]], List[List[str]]]],
     return accuracy
 
 
-def topk_accuracy_matrix(clusters: dict, max_k: int) -> pd.DataFrame:
+def topk_accuracy_matrix(clusters: dict) -> pd.DataFrame:
     """
     Create a DataFrame with top-k accuracy for all clusters, with the number
     of reagents and the accuracy as rows and columns respectively
 
     Parameters:
         clusters (dict) : Dictionary with the cluster of values and predictions
-        max_k (int) : Maximum number of top predictions to consider
 
     Returns:
         pd.DataFrame : DataFrame with top-k accuracy for all clusters, with
         the number of reagents and the accuracy as rows and columns respectively
     """
-    df = pd.DataFrame(index=[f"# Reagents {i}" for i in range(1, max_k + 1)],
-                      columns=[f"Top {i}" for i in range(1, max_k + 1)],
+    df = pd.DataFrame(index=[f"# Reagents {i}" for i in TOPKS],  # range(1, NUM_PRED + 1)],
+                      columns=[f"Top {i}" for i in TOPKS],  # range(1, NUM_PRED + 1)],
                       dtype="float")
 
     for key, value in clusters.items():
-        for k in range(1, max_k + 1):
+        for k in TOPKS:  # range(1, max_k + 1):
             # Compute the top-k accuracy for the current cluster
             accuracy = topk_accuracy(value, k)
             df.at[f"# Reagents {key}", f"Top {k}"] = accuracy

@@ -16,7 +16,7 @@ LABEL_FONTSIZE = 16
 TICK_FONTSIZE = 14
 BBOXES = {
     'test': {
-        'bbox_to_anchor': [0.97, 0.47],
+        'bbox_to_anchor': [0.97, 0.44],
         'loc': 'upper right',
         'borderaxespad': 0
     },
@@ -62,7 +62,7 @@ def do_plot():
     for topk in TOPKS:
         plot_one_figure(topk=topk)
         plot_one_figure(topk=topk, appendix='-50k')
-
+    print('- Plotted figure 2 at %s!' % FILE_DIR)
 
 def plot_one_figure(topk, appendix=''):
     data_path = os.path.join(DATA_DIR, 'results_test%s.csv' % appendix)

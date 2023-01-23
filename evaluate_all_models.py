@@ -58,16 +58,14 @@ def compute_model_topk_accuracy(write_path, pred_path, gold_path, mode):
     
     # Compute all top-k accuracies for this model
     progress_bar = tqdm(list(enumerate(all_golds)))
-    topk_mode = 'strict'  # if 'reagent' in pred_path else 'all'
-    lenk_mode = 'any'
     for i, gold in progress_bar:
         progress_bar.set_description('Computing %s accuracy' % mode)
         preds = all_preds[i * n_preds_per_gold:(i + 1) * n_preds_per_gold]
         preds, gold = standardize_molecules(preds, gold, pred_path)
         [topk_hits[k].append(
-            compute_topk_hit(preds[:k], gold, mode=topk_mode)) for k in KS]
+            compute_topk_hit(preds[:k], gold, mode='strict')) for k in KS]
         [lenk_hits[k].append(
-            compute_topk_hit(preds[:k], gold, mode=lenk_mode)) for k in KS]
+            compute_topk_hit(preds[:k], gold, mode='any')) for k in KS]
     
     # Write results for this model in a common file
     _, task, format, token, augment, embed, _ =\
