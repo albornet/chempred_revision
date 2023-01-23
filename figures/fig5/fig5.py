@@ -115,12 +115,14 @@ def plot_sample_counts(ax, clusters):
               fontsize=TICK_FONTSIZE)
 
 
-def plot_rec_prec_f1(ax, clusters, topk):
-    scores = [topk_scores(clusters[i], topk) for i in range(1, 13)]
+def plot_rec_prec_f1(ax, clusters, at_k):
+    scores = [topk_scores(clusters[i], at_k) for i in range(1, 13)]
     prec, rec, f1 = [[s[i] for s in scores] for i in range(3)]
     avg_prec, avg_rec, avg_f1 = [sum(v) / len(v) for v in (prec, rec, f1)]
-    ax.plot(REAGENTS_PER_REACTION, scores, **LINE_PARAMS)
-    ax.set_ylabel('Top-%s accuracy' % topk, fontsize=LABEL_FONTSIZE)
+    ax.plot(REAGENTS_PER_REACTION, prec, **LINE_PARAMS, color='C2')
+    ax.plot(REAGENTS_PER_REACTION, rec, **LINE_PARAMS, color='C1')
+    ax.plot(REAGENTS_PER_REACTION, f1, **LINE_PARAMS, color='C0')
+    ax.set_ylabel('Scores @%s' % at_k, fontsize=LABEL_FONTSIZE)
     ax.set_ylim([0, 1])
     y_axis = [y / 10 for y in range(11)]
     ax.set_yticks(y_axis[::2])
@@ -130,9 +132,10 @@ def plot_rec_prec_f1(ax, clusters, topk):
     ax.set_xticks(REAGENTS_PER_REACTION)
     ax.tick_params(labelsize=TICK_FONTSIZE)
     ax.grid(which='both')
-    ax.legend(['precision (average: %.2f)' % avg_prec,
-               'recall (average: %.2f)' % avg_rec,
-               'f1-score (average: %.2f)' % avg_f1], fontsize=TICK_FONTSIZE)
+    ax.legend(['precision@%s (average: %.2f)' % (at_k, avg_prec),
+               'recall@%s (average: %.2f)' % (at_k, avg_rec),
+               'f1-score@%s (average: %.2f)' % (at_k, avg_f1)],
+               fontsize=TICK_FONTSIZE)
 
 
 def plot_figure_5(clusters, path, topks, figsize=(9, 9)):

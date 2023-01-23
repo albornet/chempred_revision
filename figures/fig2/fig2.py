@@ -35,11 +35,11 @@ TASKS = [
     'reagent-pred'
 ]
 COLORS = {
-    'product-pred': 'C1',
-    'product-pred-noreag': 'C1',
-    'reactant-pred': 'C2',
-    'reactant-pred-noreag': 'C2',
-    'reactant-pred-single': 'C2',
+    'product-pred': 'C0',
+    'product-pred-noreag': 'C0',
+    'reactant-pred': 'C1',
+    'reactant-pred-noreag': 'C1',
+    'reactant-pred-single': 'C1',
     'reagent-pred': 'C3'
 }
 MARKERS = {
