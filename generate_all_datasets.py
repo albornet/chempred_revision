@@ -11,7 +11,10 @@ from rdkit import RDLogger
 RDLogger.DisableLog('rdApp.*')
 from SmilesPE.tokenizer import SPE_Tokenizer
 from gensim.models import Word2Vec
-from itertools import chain
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument('-r', '--reduce', default=1.0, type=float)
+args = parser.parse_args()
 
 
 TASKS = [
@@ -29,7 +32,7 @@ DATA_DIR = os.path.abspath('data')
 ORIGINAL_DIR = os.path.join(DATA_DIR, 'original')
 SPE_ENCODER_PATH_SMILES = os.path.join(ORIGINAL_DIR, 'spe_codes_smiles.txt')
 SPE_ENCODER_PATH_SELFIES = os.path.join(ORIGINAL_DIR, 'spe_codes_selfies.txt')
-DATA_REDUCTION_FACTOR = 0.0625  # 0.0625, 0.125, 0.25, 0.5, 1.0 (no reduction)
+DATA_REDUCTION_FACTOR = args.reduce  # 0.0625, 0.125, 0.25, 0.5, 1.0 (no reduce)
 
 
 def main():

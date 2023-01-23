@@ -4,6 +4,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('-v', '--vocab', action='store_true')
 parser.add_argument('-s', '--slurm', action='store_true')
+parser.add_argument('-r', '--reduce', default=1.0, type=float)
 args = parser.parse_args()
 
 
@@ -15,6 +16,7 @@ BASE_SLURM_PATH = os.path.join(DATA_DIR, 'original', 'base_slurm.sh')
 VOCAB_SCRIPT = 'python open-nmt/build_vocab.py'
 DO_VOCAB = args.vocab
 DO_SLURM = args.slurm
+DATA_REDUCTION_FACTOR = args.reduce  # 0.0625, 0.125, 0.25, 0.5, 1.0 (no reduce)
 FOLDS = [1, 2, 5, 10, 20]
 TEST_MODES = ['test', 'test-50k', 'roundtrip', 'roundtrip-50k']
 ROUNDTRIP_SPECS = ['atom', 'smiles', 'from-scratch']
@@ -91,6 +93,7 @@ def compute_runtime(fold):
     n_hours = n_hours_base +\
               (n_hours_max - n_hours_base) *\
               math.log(((math.e - 1) * fold + (20 - math.e)) / 19)
+    n_hours *= DATA_REDUCTION_FACTOR  # for subsampbled training datasets
     return '%s-%s:00:00' % divmod(int(n_hours), 24)
 
 

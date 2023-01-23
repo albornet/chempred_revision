@@ -1,12 +1,17 @@
 import os
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument('-r', '--reduce', default=1.0, type=float)
+args = parser.parse_args()
 
 
 CONFIGS_DIR = os.path.abspath('configs')
 LOGS_DIR = os.path.abspath('logs')
 DATA_DIR = os.path.abspath('data')
 BASE_CONFIG_PATH = os.path.join(DATA_DIR, 'original', 'base_train.yml')
-N_BASE_TRAIN_STEPS = 500000
-N_BASE_VALID_STEPS = 10000
+DATA_REDUCTION_FACTOR = args.reduce  # 0.0625, 0.125, 0.25, 0.5, 1.0 (no reduce)
+N_BASE_TRAIN_STEPS = int(500000 * DATA_REDUCTION_FACTOR)
+N_BASE_VALID_STEPS = int(10000 * DATA_REDUCTION_FACTOR)
 EMBED_TYPES = ['from-scratch', 'pre-trained']
 W2V_TEXT = """
 # Add pre-trained embeddings
