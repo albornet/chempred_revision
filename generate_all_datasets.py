@@ -1,5 +1,6 @@
 import os
 import re
+import json
 import random
 import selfies as sf
 import warnings
@@ -10,6 +11,7 @@ from rdkit import RDLogger
 RDLogger.DisableLog('rdApp.*')
 from SmilesPE.tokenizer import SPE_Tokenizer
 from gensim.models import Word2Vec
+from itertools import chain
 
 
 TASKS = [
@@ -21,20 +23,21 @@ TASKS = [
     'reagent-pred'
 ]
 USPTO_50K_TASKS = [t for t in TASKS if t != 'reagent-pred']
-FOLDS = [1]  #, 2, 5, 10, 20]
+FOLDS = [1, 2, 5, 10, 20]
 SPLITS = ['test', 'val', 'train']
 DATA_DIR = os.path.abspath('data')
 ORIGINAL_DIR = os.path.join(DATA_DIR, 'original')
 SPE_ENCODER_PATH_SMILES = os.path.join(ORIGINAL_DIR, 'spe_codes_smiles.txt')
 SPE_ENCODER_PATH_SELFIES = os.path.join(ORIGINAL_DIR, 'spe_codes_selfies.txt')
+DATA_REDUCTION_FACTOR = 0.0625  # 0.0625, 0.125, 0.25, 0.5, 1.0
 
 
 def main():
     random.seed(1234)  # this is enough for replicable augmentation
     create_smiles_datasets()  # original data -> all tasks & data augmentations
-    create_selfies_datasets()  # smiles data -> selfies data
-    create_spe_datasets()  # smiles and selfies atom data -> spe data
-    create_w2v_embeddings()  # smiles, selfies, atom, bpe -> added w2v vectors
+    # create_selfies_datasets()  # smiles data -> selfies data
+    # create_spe_datasets()  # smiles and selfies atom data -> spe data
+    # create_w2v_embeddings()  # smiles, selfies, atom, bpe -> added w2v vectors
 
 
 def create_smiles_datasets():
@@ -132,13 +135,18 @@ def generate_augmented_dataset(task, fold):
 
 
 def write_smiles_files(out_dir, task, fold, split):
-    if split != 'train': fold = 1  # no augmentation for test and valid data
+    if split != 'train':
+        fold = 1  # no augmentation for test and valid data
     with open(os.path.join(ORIGINAL_DIR, 'src-%s.txt' % split), 'r') as src_in,\
          open(os.path.join(ORIGINAL_DIR, 'tgt-%s.txt' % split), 'r') as tgt_in,\
          open(os.path.join(out_dir, 'src-%s.txt' % split), 'w') as src_out,\
          open(os.path.join(out_dir, 'tgt-%s.txt' % split), 'w') as tgt_out:
 
-        progress_bar = tqdm(list(zip(src_in.readlines(), tgt_in.readlines())))
+        to_write = list(zip(src_in.readlines(), tgt_in.readlines()))
+        if 'train' in split and DATA_REDUCTION_FACTOR < 1.0:
+            to_write = [to_write[i] for i in get_reduced_data_indices()]
+
+        progress_bar = tqdm(to_write)
         for src, tgt in progress_bar:
             progress_bar.set_description('------ Split %s' % split)
             species = parse_rxn(src, tgt)
@@ -310,6 +318,17 @@ def write_embedding_vectors(in_dir, embedding_vectors):
         for token in embedding_vectors.index_to_key:
             vector = embedding_vectors[token].tolist()
             f.write(token + ' ' + ' '.join(list(map(str, vector))) + '\n')
+
+
+def get_reduced_data_indices():
+    data_path = os.path.join(ORIGINAL_DIR, 'rxn_indices_by_len_quantiles.json')
+    rxns_indices_by_len_quantiles = json.loads(json.load(open(data_path, 'r')))
+    taken_rxn_indices = []
+    for indices in rxns_indices_by_len_quantiles:
+        n_taken_rxns = int(len(indices) * DATA_REDUCTION_FACTOR)
+        taken_rxns_indices_in_this_quantile = indices[:n_taken_rxns]
+        taken_rxn_indices.extend(taken_rxns_indices_in_this_quantile)
+    return taken_rxn_indices
 
 
 if __name__ == '__main__':
