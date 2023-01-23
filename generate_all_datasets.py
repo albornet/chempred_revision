@@ -29,15 +29,15 @@ DATA_DIR = os.path.abspath('data')
 ORIGINAL_DIR = os.path.join(DATA_DIR, 'original')
 SPE_ENCODER_PATH_SMILES = os.path.join(ORIGINAL_DIR, 'spe_codes_smiles.txt')
 SPE_ENCODER_PATH_SELFIES = os.path.join(ORIGINAL_DIR, 'spe_codes_selfies.txt')
-DATA_REDUCTION_FACTOR = 0.0625  # 0.0625, 0.125, 0.25, 0.5, 1.0
+DATA_REDUCTION_FACTOR = 0.0625  # 0.0625, 0.125, 0.25, 0.5, 1.0 (no reduction)
 
 
 def main():
     random.seed(1234)  # this is enough for replicable augmentation
     create_smiles_datasets()  # original data -> all tasks & data augmentations
-    # create_selfies_datasets()  # smiles data -> selfies data
-    # create_spe_datasets()  # smiles and selfies atom data -> spe data
-    # create_w2v_embeddings()  # smiles, selfies, atom, bpe -> added w2v vectors
+    create_selfies_datasets()  # smiles data -> selfies data
+    create_spe_datasets()  # smiles and selfies atom data -> spe data
+    create_w2v_embeddings()  # smiles, selfies, atom, bpe -> added w2v vectors
 
 
 def create_smiles_datasets():
