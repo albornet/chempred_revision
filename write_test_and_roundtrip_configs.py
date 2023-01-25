@@ -13,7 +13,7 @@ BASE_CONFIG_PATH = os.path.abspath(
     os.path.join('data', 'original', 'base_test.yml'))
 DO_TEST = args.test
 DO_ROUNDTRIP = args.roundtrip
-CKPT_SELECTION_MODE = 'last'  # 'first', 'last', 'best'
+CKPT_SELECTION_MODE = 'best'  # 'first', 'last', 'best'
 MODES = ['test', 'test-50k', 'roundtrip', 'roundtrip-50k']
 ROUNDTRIP_SPECS = ['atom', 'smiles', 'from-scratch']
 ROUNDTRIP_TASKS = ['reactant-pred', 'reactant-pred-noreag']
@@ -108,10 +108,11 @@ def identify_paths(ckpt_folder, logs_folder, mode):
 
 
 def select_ckpt_path(ckpt_folder):
+    ckpt_list = sort_ckpt_list(os.listdir(ckpt_folder))
     if CKPT_SELECTION_MODE == 'first':
-        return os.path.join(ckpt_folder, os.listdir(ckpt_folder)[0])
+        return os.path.join(ckpt_folder, ckpt_list[0])
     elif CKPT_SELECTION_MODE == 'last':
-        return os.path.join(ckpt_folder, os.listdir(ckpt_folder)[-1])
+        return os.path.join(ckpt_folder, ckpt_list[-1])
     elif CKPT_SELECTION_MODE == 'best':
         logs_folder = os.path.split(ckpt_folder)[0]
         with open(os.path.join(logs_folder, 'train_logs.log'), 'r') as f:
@@ -120,9 +121,14 @@ def select_ckpt_path(ckpt_folder):
                 step = best_ckpt_line.split('step ')[-1].strip()
                 return os.path.join(ckpt_folder, 'model_step_%s.pt' % step)
             else:  # best ckpt may be the last deleted one (so, closest = first)
-                return os.path.join(ckpt_folder, os.listdir(ckpt_folder)[0])
+                return os.path.join(ckpt_folder, ckpt_list[0])
     else:
         raise ValueError('Invalid mode for checkpoint selection')
+
+
+def sort_ckpt_list(ckpt_list):
+    ckpt_steps = [int(c.split('_')[-1][:-3]) for c in ckpt_list]
+    return [c for _, c in sorted(zip(ckpt_steps, ckpt_list))]
 
 
 def write_roundtrip_data(data_path, output_path):
