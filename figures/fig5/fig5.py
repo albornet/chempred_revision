@@ -37,7 +37,7 @@ LINE_PARAMS =  {'lw': 1,
 def do_plot():
     # Load predictions and true labels and cluster by number of true reagents
     try:
-        data_path = os.path.join(FILE_DIR, '..', 'fig4', 'fig45_data.pickle')
+        data_path = os.path.join(FILE_DIR, '..', 'fig4', 'fig45-x1_data.pickle')
         with open(data_path, 'rb') as f:
             clusters = pickle.load(f)
     except FileNotFoundError:
