@@ -49,12 +49,12 @@ def setup_train_configs(data_folder, embed_types_for_this_data):
 def write_train_config_file(config_folder, data_folder, logs_folder):
     to_write = open(BASE_CONFIG_PATH, 'r').read()
     vocab_text = SHARE_VOCAB_TEXT
-    if 'reagent-pred' in config_folder:
-        vocab_text = NOT_SHARE_VOCAB_TEXT
+    # if 'reagent-pred' in config_folder:
+    #     vocab_text = NOT_SHARE_VOCAB_TEXT
     if 'pre-trained' in config_folder: to_write += W2V_TEXT
-    fold_flag = os.path.basename(data_folder).split('x')[-1]
-    n_steps_train_max = str(int(fold_flag) * N_BASE_TRAIN_STEPS)
-    n_steps_for_valid = str(int(fold_flag) * N_BASE_VALID_STEPS)
+    # fold_flag = os.path.basename(data_folder).split('x')[-1]
+    n_steps_train_max = str(N_BASE_TRAIN_STEPS)  # * int(fold_flag))
+    n_steps_for_valid = str(N_BASE_VALID_STEPS)  # * int(fold_flag) )
     config_path = os.path.join(config_folder, 'train.yml')
     with open(config_path, 'w') as f:
         f.writelines(to_write.replace('$VOCAB_TEXT', vocab_text)
