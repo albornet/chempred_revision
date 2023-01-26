@@ -23,7 +23,7 @@ data:
 # Place to save the checkpoints
 save_model: $LOGS_FOLDER$SEPckpts$SEPmodel
 save_checkpoint_steps: $N_STEPS_FOR_VALID
-keep_checkpoint: 10
+keep_checkpoint: 11
 seed: 1234
 
 # Training steps
