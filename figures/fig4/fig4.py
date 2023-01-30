@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patheffects as pe
 import pandas as pd
 import selfies as sf
 import pickle
@@ -35,7 +36,7 @@ TOPKS = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 LABEL_FONTSIZE = 16
 TICK_FONTSIZE = 14
 FOLDS = [1, 2, 5, 10, 20]
-LOAD_DATA = False  # False
+LOAD_DATA = True  # False
 
 
 def do_plot():
@@ -288,7 +289,8 @@ def plot_figure_4(data: pd.DataFrame,
                     ha='center',
                     color='white',
                     fontsize=TICK_FONTSIZE,
-                    fontweight='bold')
+                    fontweight='bold',
+                    path_effects=[pe.withStroke(linewidth=2, foreground='k')])
     plt.tight_layout()
     plt.savefig(path, dpi=300)
 
