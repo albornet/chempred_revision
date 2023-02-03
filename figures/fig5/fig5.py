@@ -32,6 +32,9 @@ LINE_PARAMS =  {'lw': 1,
                 'markeredgewidth': 1,
                 'markeredgecolor': 'k',
                 'markersize': 10}
+BBOX_PARAMS = {'bbox_to_anchor': [0.995, 0.99],
+               'loc': 'upper right',
+               'borderaxespad': 0}
 
 
 def do_plot():
@@ -49,7 +52,7 @@ def do_plot():
     fig5_path = os.path.join(FILE_DIR, 'fig5.tiff')
     plot_figure_5(clusters, fig5_path, TOPKS)
     print('- Plotted figure 5 at %s!' % FILE_DIR)
-      
+    
 
 def topk_scores(cluster: List[Union[Tuple[List[List[str]]], List[List[str]]]],
                 k: int,
@@ -112,17 +115,22 @@ def plot_sample_counts(ax, clusters):
     ax.grid(which='both')
     ax.legend(l + l_,
               ['Number of samples', 'Number of unique reagents'],
-              fontsize=TICK_FONTSIZE)
+              fontsize=TICK_FONTSIZE,
+              **BBOX_PARAMS)
+    
+    return n_samples, n_unique_reagents
 
 
-def plot_rec_prec_f1(ax, clusters, at_k):
+def plot_rec_prec_f1(ax, clusters, at_k, n_samples):
     scores = [topk_scores(clusters[i], at_k) for i in range(1, 13)]
     prec, rec, f1 = [[s[i] for s in scores] for i in range(3)]
-    avg_prec, avg_rec, avg_f1 = [sum(v) / len(v) for v in (prec, rec, f1)]
+    avg_prec = sum([p * n / sum(n_samples) for p, n in zip(prec, n_samples)])
+    avg_rec = sum([r * n / sum(n_samples) for r, n in zip(rec, n_samples)])
+    avg_f1 = sum([f * n / sum(n_samples) for f, n in zip(f1, n_samples)])
     ax.plot(REAGENTS_PER_REACTION, prec, **LINE_PARAMS, color='C2')
     ax.plot(REAGENTS_PER_REACTION, rec, **LINE_PARAMS, color='C1')
     ax.plot(REAGENTS_PER_REACTION, f1, **LINE_PARAMS, color='C0')
-    ax.set_ylabel('Scores @%s' % at_k, fontsize=LABEL_FONTSIZE)
+    ax.set_ylabel('Scores@%s' % at_k, fontsize=LABEL_FONTSIZE)
     ax.set_ylim([0, 1])
     y_axis = [y / 10 for y in range(11)]
     ax.set_yticks(y_axis[::2])
@@ -135,7 +143,8 @@ def plot_rec_prec_f1(ax, clusters, at_k):
     ax.legend(['precision@%s (average: %.2f)' % (at_k, avg_prec),
                'recall@%s (average: %.2f)' % (at_k, avg_rec),
                'f1-score@%s (average: %.2f)' % (at_k, avg_f1)],
-               fontsize=TICK_FONTSIZE)
+               fontsize=TICK_FONTSIZE,
+               **BBOX_PARAMS)
 
 
 def plot_figure_5(clusters, path, topks, figsize=(9, 9)):
@@ -144,9 +153,11 @@ def plot_figure_5(clusters, path, topks, figsize=(9, 9)):
         gs = fig.add_gridspec(2, 1, hspace=0.3)
         ax1 = fig.add_subplot(gs[0, 0])
         ax2 = fig.add_subplot(gs[1, 0])
-        plot_rec_prec_f1(ax1, clusters, topk)
-        plot_sample_counts(ax2, clusters)
-        plt.savefig(path.replace('.', '-@%s.' % topk), dpi=300)
+        n_samples, _ = plot_sample_counts(ax2, clusters)
+        plot_rec_prec_f1(ax1, clusters, topk, n_samples)
+        plt.savefig(path.replace('.', '-@%s.' % topk),
+                    bbox_inches='tight',
+                    dpi=300)
 
 
 if __name__ == '__main__':

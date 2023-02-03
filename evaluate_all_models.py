@@ -135,13 +135,13 @@ def canonicalize_smiles(smiles):
 def create_smiles_from_selfies(selfies):
     try:
         return sf.decoder(selfies)
-    except sf.DecoderError:
+    except (RecursionError, sf.DecoderError):
         selfies_mols = selfies.split('.')
         smiles_mols = []
         for selfies_mol in selfies_mols:
             try:
                 smiles_mol = sf.decoder(selfies_mol)
-            except sf.DecoderError:
+            except (RecursionError, sf.DecoderError):
                 smiles_mol = '?'
             smiles_mols.append(smiles_mol)
         return '.'.join(smiles_mols)
