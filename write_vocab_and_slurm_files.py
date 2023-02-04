@@ -88,7 +88,7 @@ def write_train_slurm_script(config_path, fold):
 
 
 def compute_runtime(fold):
-    n_hours_base = 48  # approximate runtime for 1 fold data augmentation
+    n_hours_base = 24  # approximate runtime for 1 fold data augmentation
     n_hours_max = 7 * 24  # 7 days = max runtime on baobab
     n_hours = n_hours_base +\
               (n_hours_max - n_hours_base) *\
