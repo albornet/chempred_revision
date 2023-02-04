@@ -29,7 +29,7 @@ BBOXES = {
 TASKS = [
     'product-pred',
     'reactant-pred',
-    'reactant-pred-single',
+    # 'reactant-pred-single',  # removed because not interesting in the paper
     'product-pred-noreag',
     'reactant-pred-noreag',
     'reagent-pred'
@@ -63,6 +63,7 @@ def do_plot():
         plot_one_figure(topk=topk)
         plot_one_figure(topk=topk, appendix='-50k')
     print('- Plotted figure 2 at %s!' % FILE_DIR)
+
 
 def plot_one_figure(topk, appendix=''):
     data_path = os.path.join(DATA_DIR, 'results_test%s.csv' % appendix)

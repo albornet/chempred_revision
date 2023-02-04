@@ -34,9 +34,9 @@ MAX_REAGENTS = 12  # up to how many reagents per reaction the analysis goes
 REAGENTS_PER_REACTION = range(1, MAX_REAGENTS + 1)
 TOPKS = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 LABEL_FONTSIZE = 16
-TICK_FONTSIZE = 14
+TICK_FONTSIZE = 13
 FOLDS = [1, 2, 5, 10, 20]
-LOAD_DATA = True  # False
+LOAD_DATA = False  # False
 
 
 def do_plot():
@@ -245,7 +245,7 @@ def topk_accuracy_matrix(clusters: dict) -> pd.DataFrame:
 def plot_figure_4(data: pd.DataFrame,
                   path: str = '_.tiff',
                   colorbar: bool = False,
-                  figsize: tuple = (8, 8)) -> None:
+                  figsize: tuple = (8, 6)) -> None:
     """
     This function plots a heatmap of the input accuracy matrix.
     The x-axis shows the 'top N' accuracy, and the y-axis shows
