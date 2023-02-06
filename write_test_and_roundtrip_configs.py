@@ -13,7 +13,7 @@ BASE_CONFIG_PATH = os.path.abspath(
     os.path.join('data', 'original', 'base_test.yml'))
 DO_TEST = args.test
 DO_ROUNDTRIP = args.roundtrip
-CKPT_SELECTION_MODE = 'best'  # 'first', 'last', 'best'
+CKPT_SELECTION_MODE = 'last'  # 'first', 'last', 'best'  # empirically, 'last' works best
 MODES = ['test', 'test-50k', 'roundtrip', 'roundtrip-50k']
 ROUNDTRIP_SPECS = ['atom', 'smiles', 'from-scratch']
 ROUNDTRIP_TASKS = ['reactant-pred', 'reactant-pred-noreag']

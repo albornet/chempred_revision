@@ -29,10 +29,10 @@ BBOXES = {
 TASKS = [
     'product-pred',
     'reactant-pred',
-    # 'reactant-pred-single',  # removed because not interesting in the paper
+    'reagent-pred',
     'product-pred-noreag',
     'reactant-pred-noreag',
-    'reagent-pred'
+    # 'reactant-pred-single'  # removed because not interesting in the paper
 ]
 COLORS = {
     'product-pred': 'C0',
@@ -55,6 +55,14 @@ LINE_PARAMS =  {
     'markeredgewidth': 1,
     'markeredgecolor': 'k',
     'markersize': 8
+}
+LEGENDS = {
+    'product-pred': 'Product pred. (reag+)',
+    'reactant-pred': 'Reactant pred. (reag+)',
+    'reagent-pred': 'Reagent pred.',
+    'product-pred-noreag': 'Product pred. (reag-)',
+    'reactant-pred-noreag': 'Reactant pred. (reag-)',
+    # 'reactant-pred-single': 'Reactant pred. (single, reag+)'  # removed because not developped in the paper
 }
 
 
@@ -79,7 +87,12 @@ def plot_one_table(ax, mode, data, topk):
     for task in data.keys():
         to_plot = [d[TOPKS.index(topk)] for d in data[task]]
         color, marker = COLORS[task], MARKERS[task]
-        ax.plot(X_AXIS, to_plot, color, **LINE_PARAMS, marker=marker, label=task)
+        ax.plot(X_AXIS,
+                to_plot,
+                color,
+                **LINE_PARAMS,
+                marker=marker,
+                label=LEGENDS[task])
         
     ax.set_ylabel('Top-%s accuracy' % topk, fontsize=LABEL_FONTSIZE)
     ax.set_ylim(*Y_RANGE)
