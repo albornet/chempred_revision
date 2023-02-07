@@ -143,3 +143,4 @@ open-nmt/.github/*
 open-nmt/.gitignore
 *.tiff
 *.pickle
+*/*/fig*.png
