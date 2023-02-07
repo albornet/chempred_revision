@@ -36,7 +36,7 @@ TOPKS = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 LABEL_FONTSIZE = 16
 TICK_FONTSIZE = 13
 FOLDS = [1, 2, 5, 10, 20]
-LOAD_DATA = False  # False
+LOAD_DATA = False  # put back to False!
 
 
 def do_plot():
@@ -60,7 +60,7 @@ def do_plot():
         matrix = topk_accuracy_matrix(clusters)
         
         # Plot figure 4
-        fig4_path = os.path.join(FILE_DIR, 'fig4-x%s.tiff' % fold)
+        fig4_path = os.path.join(FILE_DIR, 'fig4-x%s.png' % fold)
         plot_figure_4(matrix.iloc[:MAX_REAGENTS, :], fig4_path)
         
     print('- Plotted figure 4 at %s!' % FILE_DIR)
@@ -243,7 +243,7 @@ def topk_accuracy_matrix(clusters: dict) -> pd.DataFrame:
 
 
 def plot_figure_4(data: pd.DataFrame,
-                  path: str = '_.tiff',
+                  save_path: str = '_.png',
                   colorbar: bool = False,
                   figsize: tuple = (8, 6)) -> None:
     """
@@ -284,7 +284,7 @@ def plot_figure_4(data: pd.DataFrame,
         for j in range(data.shape[1]):
             ax.text(j + 0.5,
                     i + 0.5,
-                    np.round(data.iloc()[i, j], 2),
+                    '%.02f' % np.round(data.iloc()[i, j], 2),
                     va='center',
                     ha='center',
                     color='white',
@@ -292,7 +292,7 @@ def plot_figure_4(data: pd.DataFrame,
                     fontweight='bold',
                     path_effects=[pe.withStroke(linewidth=2, foreground='k')])
     plt.tight_layout()
-    plt.savefig(path, dpi=300)
+    plt.savefig(save_path, dpi=300)
 
 
 if __name__ == '__main__':

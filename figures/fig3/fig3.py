@@ -1,8 +1,8 @@
 import os
 import csv
-import matplotlib
-matplotlib.use('agg')
 import matplotlib.pyplot as plt
+import matplotlib.image as image
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 
 
 FILE_DIR = os.path.split(__file__)[0]
@@ -17,12 +17,39 @@ Y_AXIS = (0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
 Y_RANGE = (0.2, 1.0)
 LABEL_FONTSIZE = 16
 TICK_FONTSIZE = 14
+N_LEGEND_COLS = 2
 SPECS = ('strict_reag+', 'strict_reag-', 'lenient_reag+', 'lenient_reag-')
 BASE_DATA = {s: {fold: None for fold in DATA_AUGMENTATIONS} for s in SPECS}
 LINE_PARAMS =  {'lw': 1,
                 'markeredgewidth': 1,
                 'markeredgecolor': 'k',
                 'markersize': 10}
+BBOXES = {
+    'reac_pred': {
+        'loc': 'lower center',
+        'edgecolor': 'k',
+        'framealpha': 1.0,
+        'fancybox': False
+    },
+    'reac_pred-50k': {
+        'loc': 'upper center',
+        'edgecolor': 'k',
+        'framealpha': 1.0,
+        'fancybox': False
+    },
+    'roundtrip': {
+        'loc': 'upper center',
+        'bbox_to_anchor': [0.535, 0.7],
+        'columnspacing': 9.5,
+        'frameon': False
+    },
+    'roundtrip-50k': {
+        'loc': 'upper center',
+        'bbox_to_anchor': [0.535, 0.7],
+        'columnspacing': 9.5,
+        'frameon': False
+    }
+}
 
 
 def do_plot():
@@ -45,14 +72,12 @@ def plot_one_figure(appendix=''):
     plot_one_table(ax1, mode='reac_pred%s' % appendix, data=data_reactant_pred)
     plot_one_table(ax2, mode='roundtrip%s' % appendix, data=data_roundtrip)
 
-    save_path = os.path.join(FILE_DIR, 'fig3%s.tiff' % appendix)
+    save_path = os.path.join(FILE_DIR, 'fig3%s.png' % appendix)
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
 
 
 def plot_one_table(ax, mode, data):
     title = TITLES[mode]
-    legend_loc = 'upper center' if mode == 'reac_pred-50k' else 'lower center'
-    n_legend_cols = 1 if 'Roundtrip' in title else 2
     if 'Roundtrip' in title:
         ax.plot(X_AXIS, data['strict_reag+'], 'C1', **LINE_PARAMS,
                 marker='o', label='With reagents')
@@ -77,9 +102,13 @@ def plot_one_table(ax, mode, data):
     ax.set_xticklabels([s.replace('x0', 'x') for s in DATA_AUGMENTATIONS])
     ax.tick_params(labelsize=TICK_FONTSIZE)
     ax.grid(which='both')
-    ax.legend(fontsize=TICK_FONTSIZE,
-              ncol=n_legend_cols,
-              loc=legend_loc)
+    ax.legend(fontsize=TICK_FONTSIZE, ncol=N_LEGEND_COLS, **BBOXES[mode])
+    
+    if 'Roundtrip' in title:
+        helper = image.imread(os.path.join(FILE_DIR, 'fig3_helper.png'))
+        helper_box = OffsetImage(helper, zoom=0.23333)
+        helper_ab = AnnotationBbox(helper_box, frameon=True, xy=(10.5, 0.487))
+        ax.add_artist(helper_ab)
 
 
 def get_data(file_path):

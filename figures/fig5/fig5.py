@@ -27,14 +27,21 @@ REAGENTS_PER_REACTION = range(1, MAX_REAGENTS + 1)
 TOPKS = (1, 3, 5, 10)
 LABEL_FONTSIZE = 16
 TICK_FONTSIZE = 14
-LINE_PARAMS =  {'lw': 1,
-                'marker': 'o',
-                'markeredgewidth': 1,
-                'markeredgecolor': 'k',
-                'markersize': 10}
-BBOX_PARAMS = {'bbox_to_anchor': [0.995, 0.99],
-               'loc': 'upper right',
-               'borderaxespad': 0}
+LINE_PARAMS =  {
+    'lw': 1,
+    'marker': 'o',
+    'markeredgewidth': 1,
+    'markeredgecolor': 'k',
+    'markersize': 10,
+}
+BBOX_PARAMS = {
+    'bbox_to_anchor': [0.995, 0.985],
+    'loc': 'upper right',
+    'borderaxespad': 0,
+    'edgecolor': 'k',
+    'framealpha': 1.0,
+    'fancybox': False
+}
 
 
 def do_plot():
@@ -49,7 +56,7 @@ def do_plot():
              You must set LOAD_DATA to False in figures/fig4/fig4.py')
     
     # Plot figure 5
-    fig5_path = os.path.join(FILE_DIR, 'fig5.tiff')
+    fig5_path = os.path.join(FILE_DIR, 'fig5.png')
     plot_figure_5(clusters, fig5_path, TOPKS)
     print('- Plotted figure 5 at %s!' % FILE_DIR)
     
@@ -147,7 +154,7 @@ def plot_rec_prec_f1(ax, clusters, at_k, n_samples):
                **BBOX_PARAMS)
 
 
-def plot_figure_5(clusters, path, topks, figsize=(9, 9)):
+def plot_figure_5(clusters, save_path, topks, figsize=(9, 9)):
     for topk in topks:
         fig = plt.figure(figsize=figsize)
         gs = fig.add_gridspec(2, 1, hspace=0.3)
@@ -155,7 +162,7 @@ def plot_figure_5(clusters, path, topks, figsize=(9, 9)):
         ax2 = fig.add_subplot(gs[1, 0])
         n_samples, _ = plot_sample_counts(ax2, clusters)
         plot_rec_prec_f1(ax1, clusters, topk, n_samples)
-        plt.savefig(path.replace('.', '-@%s.' % topk),
+        plt.savefig(save_path.replace('.', '-@%s.' % topk),
                     bbox_inches='tight',
                     dpi=300)
 

@@ -18,12 +18,18 @@ BBOXES = {
     'test': {
         'bbox_to_anchor': [0.97, 0.44],
         'loc': 'upper right',
-        'borderaxespad': 0
+        'borderaxespad': 0,
+        'edgecolor': 'k',
+        'framealpha': 1.0,
+        'fancybox': False
     },
     'test-50k': {
         'bbox_to_anchor': [0.97, 0.05],
         'loc': 'lower right',
-        'borderaxespad': 0
+        'borderaxespad': 0,
+        'edgecolor': 'k',
+        'framealpha': 1.0,
+        'fancybox': False
     },
 }
 TASKS = [
@@ -75,7 +81,7 @@ def do_plot():
 
 def plot_one_figure(topk, appendix=''):
     data_path = os.path.join(DATA_DIR, 'results_test%s.csv' % appendix)
-    save_path = os.path.join(FILE_DIR, 'fig2%s-top%s.tiff' % (appendix, topk))
+    save_path = os.path.join(FILE_DIR, 'fig2%s-top%s.png' % (appendix, topk))
     data = get_data(data_path)  # dictionary, keys are tasks
     fig = plt.figure(figsize=(9, 5))
     ax = fig.add_subplot()
