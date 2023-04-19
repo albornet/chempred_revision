@@ -105,7 +105,7 @@ def plot_one_table(ax, mode, data):
     ax.legend(fontsize=TICK_FONTSIZE, ncol=N_LEGEND_COLS, **BBOXES[mode])
     
     if 'Roundtrip' in title:
-        diagram = image.imread(os.path.join(FILE_DIR, 'diagram_roundtrip.png'))
+        diagram = image.imread(os.path.join(FILE_DIR, 'roundtrip_diagram.png'))
         diagram_box = OffsetImage(diagram, zoom=0.23333)
         diagram_ab = AnnotationBbox(diagram_box, frameon=True, xy=(10.5, 0.487))
         ax.add_artist(diagram_ab)
