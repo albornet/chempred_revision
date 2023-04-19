@@ -1,6 +1,6 @@
 Code for Jaume-Santero-2022 revised manuscript
 ======================
-This repository contains the code that was written to generate the results in the manuscript *Transformer performance for chemical reactions: analysis of different predictive and evaluation scenarios*, including additional simulations asked by the reviewers.
+This repository contains the code that was written to generate the results in the manuscript *Transformer performance for chemical reactions: analysis of different predictive and evaluation scenarios*, including additional simulations asked by the reviewers. The data from the human experiment (figure 6 of the manuscript) have been uploaded to figures/fig6/data_fig6.xlsx.
 
 How to reproduce the reported results
 -------------------------------------
